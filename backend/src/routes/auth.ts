@@ -1,6 +1,6 @@
 import express, {Request,Response} from "express";
 import jwt from "jsonwebtoken";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "../prismaSRC/generated/prisma/client";
 import bcrypt from "bcrypt";
 import authenticateToken from "../middleware/auth";
 import { prisma } from "../lib/prisma";
@@ -56,3 +56,5 @@ authRouter.post('/auth/signup',async(req:Request,res:Response) => {
         return res.status(500).json({ error: "Error creating user" });
     }
 });
+
+export default authRouter;
