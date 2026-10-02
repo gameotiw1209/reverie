@@ -110,6 +110,47 @@ authRouter.post('/auth/login',async(req:Request,res:Response)=>{
         return;
     }
 });
+authRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
+    try {
+        const tokenId = req.userId;
 
+        if (!tokenId) {
+            res.status(401).json({ msg: "Unauthorized" });
+            return;
+        }
+        const user = await prisma.user.findUnique({
+            where: {
+                id: tokenId
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true
+            }
+        });
+        if (!user) {
+            res.status(401).json({ msg: "User not found" });
+            return;
+        }
+        res.status(200).json({ user });
+        return;
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ msg: "Something went wrong" });
+        return;
+    }
+});
+authRouter.post("/auth/logout", (req: Request, res: Response) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production"
+    });
+
+    res.status(200).json({
+        msg: "Logout successful"
+    });
+    return;
+});
 
 export default authRouter;
