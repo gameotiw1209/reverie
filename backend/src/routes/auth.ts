@@ -11,11 +11,12 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 authRouter.post('/auth/signup',async(req:Request,res:Response) => {
     try{
-        const{ email,password }= req.body ?? {};
+        const{ email,password,name }= req.body ?? {};
 
         if (
             typeof email !=="string" ||
-            typeof password !== "string"
+            typeof password !== "string" ||
+            typeof name !== "string"
         ){
             res.status(400).json({msg:'all fields are required'});
             return;
@@ -31,12 +32,16 @@ authRouter.post('/auth/signup',async(req:Request,res:Response) => {
             res.status(400).json({msg:"password must be greater then 8 characters"});
             return;
         }
-
+        if(name.length > 50){
+            res.status(400).json({msg:"name can't be this big sybau"});
+            return;
+        }
         const passwordHash = await bcrypt.hash(password,12);
 
         const newUser = await prisma.user.create({
             data:{
                 email:normalizedEmail,
+                name:name,
                 passwordHash
             },
             select:{
@@ -97,13 +102,14 @@ authRouter.post('/auth/login',async(req:Request,res:Response)=>{
         
         res.cookie("token",token,{httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",maxAge :365 * 24 * 60 * 60 * 1000});
 
-        res.status(200).json({msg:"Login successful",user:{id:user.id,email:user.email}});
+        res.status(200).json({msg:"Login successful",user:{id:user.id,email:user.email,name:user.name}});
         return;
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ msg: "Something went wrong during login" });
         return;
     }
-})
+});
+
 
 export default authRouter;
