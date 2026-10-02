@@ -1,11 +1,13 @@
 import express, {Request,Response} from "express";
 import jwt from "jsonwebtoken";
-import { Prisma, PrismaClient } from "../prismaSRC/generated/prisma/client";
+import { Prisma } from "../generated/client";
 import bcrypt from "bcrypt";
 import authenticateToken from "../middleware/auth";
 import { prisma } from "../lib/prisma";
 
 const authRouter = express.Router();
+console.log("AUTH ROUTER LOADED");
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 authRouter.post('/auth/signup',async(req:Request,res:Response) => {
     try{
@@ -15,10 +17,10 @@ authRouter.post('/auth/signup',async(req:Request,res:Response) => {
             typeof email !=="string" ||
             typeof password !== "string"
         ){
-            return res.status(400).json({msg:'all fields are required'})
+            res.status(400).json({msg:'all fields are required'});
+            return;
         }
         const normalizedEmail = email.trim().toLowerCase();
-        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if(normalizedEmail.length > 254 || !EMAIL_REGEX.test(normalizedEmail)){
             res.status(400).json({msg:"invalid email form"});
@@ -50,11 +52,58 @@ authRouter.post('/auth/signup',async(req:Request,res:Response) => {
             error instanceof Prisma.PrismaClientKnownRequestError &&
             error.code === "P2002"
         ) {
-            return res.status(409).json({ msg: "email already registered" });
+            res.status(409).json({ msg: "email already registered" });
+            return;
         }
         console.error("Error creating user: ", error);
-        return res.status(500).json({ error: "Error creating user" });
+        res.status(500).json({ error: "Error creating user" });
+        return;
     }
 });
+
+authRouter.post('/auth/login',async(req:Request,res:Response)=>{
+    console.log("LOGIN ROUTE HIT");
+    try{
+        const{ email,password }= req.body ?? {};
+        if (
+            typeof email !=="string" ||
+            typeof password !== "string"
+        ){
+            res.status(400).json({msg:'all fields are required'})
+            return;
+        }
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if(normalizedEmail.length > 254 || !EMAIL_REGEX.test(normalizedEmail)){
+            res.status(400).json({msg:"invalid email form"});
+            return;
+        }
+        const user=await prisma.user.findUnique({where :{email : normalizedEmail} });
+        if(!user){
+            res.status(401).json({msg:"Email or password is incorrect"});
+            return;
+        }
+        const ismatch=await bcrypt.compare(password, user.passwordHash);
+        if(!ismatch){
+             res.status(401).json({msg:"Email or password is incorrect"});
+             return;
+        }
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+            res.status(500).json({ msg: "JWT secret is not configured" });
+            return;
+        }
+        const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '365d' });
+        
+        res.cookie("token",token,{httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",maxAge :365 * 24 * 60 * 60 * 1000});
+
+        res.status(200).json({msg:"Login successful",user:{id:user.id,email:user.email}});
+        return;
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).json({ msg: "Something went wrong during login" });
+        return;
+    }
+})
 
 export default authRouter;
