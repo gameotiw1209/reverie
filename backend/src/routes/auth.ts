@@ -8,6 +8,9 @@ import { prisma } from "../lib/prisma";
 const authRouter = express.Router();
 console.log("AUTH ROUTER LOADED");
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//this is a signup post like its easy to get an idea of what is going on like i only messed up with the prisma.user.create earlier
+//as it was some prisma generate error and like yeah the way i did first it with the mongoose only a prisma.user comes in extra and 
+//also like bringing it with some structure way of making it in data property object that was it ig
 
 authRouter.post('/auth/signup',async(req:Request,res:Response) => {
     try{
@@ -65,6 +68,9 @@ authRouter.post('/auth/signup',async(req:Request,res:Response) => {
         return;
     }
 });
+//loginstart was pretty easy after the signup as usal but the res.cookie method of express was something new like in thsi prj we be storing it in cookie like into 
+// the browser earlier it was directly handed to the user so like with that token he needs to get to the website but this time its damn proffesional and easy like after
+//this cookie gets into the broswer with authenticateToken in the middleware user can easily post there notes and get it 
 
 authRouter.post('/auth/login',async(req:Request,res:Response)=>{
     console.log("LOGIN ROUTE HIT");
@@ -110,6 +116,8 @@ authRouter.post('/auth/login',async(req:Request,res:Response)=>{
         return;
     }
 });
+//same thing like tells who is it on the login session now with the userid of the cookie that is present in the browser 
+
 authRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
         const tokenId = req.userId;
@@ -140,6 +148,9 @@ authRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response
         return;
     }
 });
+//this was some new stuff got in into clearing the present cookie from the broswer with the express method of clearing it 
+//res.clearCookie with some property insdie it as usual to letting knwo what all stuff gotta remove 
+
 authRouter.post("/auth/logout", (req: Request, res: Response) => {
     res.clearCookie("token", {
         httpOnly: true,
