@@ -54,3 +54,8 @@ export type Notes = Prisma.NotesModel
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model ChatMessage
+ * 
+ */
+export type ChatMessage = Prisma.ChatMessageModel

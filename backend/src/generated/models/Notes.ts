@@ -191,6 +191,7 @@ export type NotesWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Notes"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Notes"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  messages?: Prisma.ChatMessageListRelationFilter
 }
 
 export type NotesOrderByWithRelationInput = {
@@ -201,6 +202,7 @@ export type NotesOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  messages?: Prisma.ChatMessageOrderByRelationAggregateInput
 }
 
 export type NotesWhereUniqueInput = Prisma.AtLeast<{
@@ -214,6 +216,7 @@ export type NotesWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Notes"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Notes"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  messages?: Prisma.ChatMessageListRelationFilter
 }, "id">
 
 export type NotesOrderByWithAggregationInput = {
@@ -247,6 +250,7 @@ export type NotesCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutNotesInput
+  messages?: Prisma.ChatMessageCreateNestedManyWithoutNoteInput
 }
 
 export type NotesUncheckedCreateInput = {
@@ -256,6 +260,7 @@ export type NotesUncheckedCreateInput = {
   text: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  messages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutNoteInput
 }
 
 export type NotesUpdateInput = {
@@ -265,6 +270,7 @@ export type NotesUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutNotesNestedInput
+  messages?: Prisma.ChatMessageUpdateManyWithoutNoteNestedInput
 }
 
 export type NotesUncheckedUpdateInput = {
@@ -274,6 +280,7 @@ export type NotesUncheckedUpdateInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.ChatMessageUncheckedUpdateManyWithoutNoteNestedInput
 }
 
 export type NotesCreateManyInput = {
@@ -339,6 +346,11 @@ export type NotesOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type NotesScalarRelationFilter = {
+  is?: Prisma.NotesWhereInput
+  isNot?: Prisma.NotesWhereInput
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -389,12 +401,27 @@ export type NotesUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.NotesScalarWhereInput | Prisma.NotesScalarWhereInput[]
 }
 
+export type NotesCreateNestedOneWithoutMessagesInput = {
+  create?: Prisma.XOR<Prisma.NotesCreateWithoutMessagesInput, Prisma.NotesUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.NotesCreateOrConnectWithoutMessagesInput
+  connect?: Prisma.NotesWhereUniqueInput
+}
+
+export type NotesUpdateOneRequiredWithoutMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.NotesCreateWithoutMessagesInput, Prisma.NotesUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.NotesCreateOrConnectWithoutMessagesInput
+  upsert?: Prisma.NotesUpsertWithoutMessagesInput
+  connect?: Prisma.NotesWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NotesUpdateToOneWithWhereWithoutMessagesInput, Prisma.NotesUpdateWithoutMessagesInput>, Prisma.NotesUncheckedUpdateWithoutMessagesInput>
+}
+
 export type NotesCreateWithoutUserInput = {
   id?: string
   title: string
   text: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  messages?: Prisma.ChatMessageCreateNestedManyWithoutNoteInput
 }
 
 export type NotesUncheckedCreateWithoutUserInput = {
@@ -403,6 +430,7 @@ export type NotesUncheckedCreateWithoutUserInput = {
   text: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  messages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutNoteInput
 }
 
 export type NotesCreateOrConnectWithoutUserInput = {
@@ -443,6 +471,58 @@ export type NotesScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Notes"> | Date | string
 }
 
+export type NotesCreateWithoutMessagesInput = {
+  id?: string
+  title: string
+  text: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutNotesInput
+}
+
+export type NotesUncheckedCreateWithoutMessagesInput = {
+  id?: string
+  userID: string
+  title: string
+  text: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type NotesCreateOrConnectWithoutMessagesInput = {
+  where: Prisma.NotesWhereUniqueInput
+  create: Prisma.XOR<Prisma.NotesCreateWithoutMessagesInput, Prisma.NotesUncheckedCreateWithoutMessagesInput>
+}
+
+export type NotesUpsertWithoutMessagesInput = {
+  update: Prisma.XOR<Prisma.NotesUpdateWithoutMessagesInput, Prisma.NotesUncheckedUpdateWithoutMessagesInput>
+  create: Prisma.XOR<Prisma.NotesCreateWithoutMessagesInput, Prisma.NotesUncheckedCreateWithoutMessagesInput>
+  where?: Prisma.NotesWhereInput
+}
+
+export type NotesUpdateToOneWithWhereWithoutMessagesInput = {
+  where?: Prisma.NotesWhereInput
+  data: Prisma.XOR<Prisma.NotesUpdateWithoutMessagesInput, Prisma.NotesUncheckedUpdateWithoutMessagesInput>
+}
+
+export type NotesUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutNotesNestedInput
+}
+
+export type NotesUncheckedUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userID?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type NotesCreateManyUserInput = {
   id?: string
   title: string
@@ -457,6 +537,7 @@ export type NotesUpdateWithoutUserInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.ChatMessageUpdateManyWithoutNoteNestedInput
 }
 
 export type NotesUncheckedUpdateWithoutUserInput = {
@@ -465,6 +546,7 @@ export type NotesUncheckedUpdateWithoutUserInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.ChatMessageUncheckedUpdateManyWithoutNoteNestedInput
 }
 
 export type NotesUncheckedUpdateManyWithoutUserInput = {
@@ -476,6 +558,35 @@ export type NotesUncheckedUpdateManyWithoutUserInput = {
 }
 
 
+/**
+ * Count Type NotesCountOutputType
+ */
+
+export type NotesCountOutputType = {
+  messages: number
+}
+
+export type NotesCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  messages?: boolean | NotesCountOutputTypeCountMessagesArgs
+}
+
+/**
+ * NotesCountOutputType without action
+ */
+export type NotesCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NotesCountOutputType
+   */
+  select?: Prisma.NotesCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * NotesCountOutputType without action
+ */
+export type NotesCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChatMessageWhereInput
+}
+
 
 export type NotesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -485,6 +596,8 @@ export type NotesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  messages?: boolean | Prisma.Notes$messagesArgs<ExtArgs>
+  _count?: boolean | Prisma.NotesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["notes"]>
 
 export type NotesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -519,6 +632,8 @@ export type NotesSelectScalar = {
 export type NotesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userID" | "title" | "text" | "createdAt" | "updatedAt", ExtArgs["result"]["notes"]>
 export type NotesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  messages?: boolean | Prisma.Notes$messagesArgs<ExtArgs>
+  _count?: boolean | Prisma.NotesCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NotesIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -531,6 +646,7 @@ export type $NotesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name: "Notes"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    messages: Prisma.$ChatMessagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -934,6 +1050,7 @@ readonly fields: NotesFieldRefs;
 export interface Prisma__NotesClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  messages<T extends Prisma.Notes$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Notes$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1362,6 +1479,30 @@ export type NotesDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Notes to delete.
    */
   limit?: number
+}
+
+/**
+ * Notes.messages
+ */
+export type Notes$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ChatMessage
+   */
+  select?: Prisma.ChatMessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ChatMessage
+   */
+  omit?: Prisma.ChatMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChatMessageInclude<ExtArgs> | null
+  where?: Prisma.ChatMessageWhereInput
+  orderBy?: Prisma.ChatMessageOrderByWithRelationInput | Prisma.ChatMessageOrderByWithRelationInput[]
+  cursor?: Prisma.ChatMessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChatMessageScalarFieldEnum | Prisma.ChatMessageScalarFieldEnum[]
 }
 
 /**
