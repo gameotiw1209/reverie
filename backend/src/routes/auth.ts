@@ -6,7 +6,6 @@ import authenticateToken from "../middleware/auth";
 import { prisma } from "../lib/prisma";
 
 const authRouter = express.Router();
-console.log("AUTH ROUTER LOADED");
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //this is a signup post like its easy to get an idea of what is going on like i only messed up with the prisma.user.create earlier
 //as it was some prisma generate error and like yeah the way i did first it with the mongoose only a prisma.user comes in extra and 
