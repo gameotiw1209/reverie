@@ -2,6 +2,7 @@ import express,{Request,Response} from "express";
 import authenticateToken from "../middleware/auth";
 import {prisma} from "../lib/prisma";
 import groq,{GROQ_MODEL} from "../lib/groq";
+import { NotebookDotIcon } from "lucide-react";
 
 const chatRouter=express.Router();
 
@@ -117,5 +118,32 @@ chatRouter.post("/notes/:id/chat",authenticateToken,async(req:Request,res:Respon
         return;
     }
 });
+chatRouter.get("/notes/:id/chat",authenticateToken,async(req:Request,res:Response) => {
+    try{
+        const userid=req.userId;
+        const noteId=req.params.id;
+        if(!userid){
+            res.status(401).json({msg:"Unauthorized"});
+            return;
+        }
+        if(typeof noteId !== "string"){
+            res.status(400).json({msg:"Invalid note ID"});
+            return;
+        }
+        const chat=await prisma.chatMessage.findMany({
+            where:{
+                userId:userid,
+                noteId
+            },
+            orderBy:{
+                createdAt:"asc"
+            }
+        });
+        res.status(200).json({chat});
+    }catch(error){
+        console.error("Chat history error:",error);
+        res.status(500).json({msg:"Failed to retrieve chat history"});
+    };
 
+})
 export default chatRouter;
