@@ -1,0 +1,118 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const prisma_1 = require("../lib/prisma");
+const auth_1 = __importDefault(require("../middleware/auth"));
+const client_1 = require("@prisma/client");
+const notesRouter = express_1.default.Router();
+// Brought in authenticateToken so the user doesn't need to provide
+// their userId manually. The userId is extracted from the verified JWT
+// stored in the browser's HttpOnly cookie. 
+notesRouter.post("/notes", auth_1.default, async (req, res) => {
+    try {
+        const { title, text } = req.body ?? {};
+        const userId = req.userId;
+        if (!userId) {
+            res.status(401).json({ msg: "Unauthorized" });
+            return;
+        }
+        if (typeof title !== "string" || !title.trim() ||
+            typeof text !== "string" || !text.trim()) {
+            res.status(400).json({ msg: "title, text are required" });
+            return;
+        }
+        const note = await prisma_1.prisma.notes.create({
+            data: { title: title.trim(), text: text.trim(), userID: userId },
+        });
+        res.status(201).json(note);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Something went wrong" });
+    }
+});
+//same here now the get request comes by a client browser fetches the cookies as per the req.userid 
+//  finds the user and returns it data through DB basically req.userid is playing a major role in here 
+//so that wahi userid ka db mile
+notesRouter.get("/notes", auth_1.default, async (req, res) => {
+    try {
+        const userId = req.userId;
+        if (!userId) {
+            res.status(401).json({ msg: "Unauthorized" });
+            return;
+        }
+        const notes = await prisma_1.prisma.notes.findMany({ where: { userID: userId }, orderBy: { createdAt: "desc" } });
+        res.status(200).json(notes);
+        return;
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Something went wrong" });
+    }
+});
+notesRouter.patch("/notes/:id", auth_1.default, async (req, res) => {
+    try {
+        const { title, text } = req.body ?? {};
+        const userId = req.userId;
+        const noteId = req.params.id;
+        if (!userId) {
+            res.status(401).json({ msg: "Unauthorized" });
+            return;
+        }
+        if (typeof noteId !== "string" || !noteId) {
+            res.status(400).json({ msg: "Invalid note ID" });
+            return;
+        }
+        if (title === undefined && text === undefined) {
+            res.status(400).json({ msg: "Provide title or text to update" });
+            return;
+        }
+        const note = await prisma_1.prisma.notes.update({
+            where: { id: noteId, userID: userId },
+            data: {
+                ...(title !== undefined && { title: title.trim() }),
+                ...(text !== undefined && { text: text.trim() })
+            }
+        });
+        res.status(200).json(note);
+    }
+    catch (error) {
+        if (error instanceof client_1.Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+            res.status(404).json({ msg: "Note not found" });
+            return;
+        }
+        console.error("Update note error:", error);
+        res.status(500).json({ msg: "Something went wrong" });
+    }
+});
+notesRouter.delete("/notes/:id", auth_1.default, async (req, res) => {
+    try {
+        const userId = req.userId;
+        const noteId = req.params.id;
+        if (!userId) {
+            res.status(401).json({ msg: "Unauthorized" });
+            return;
+        }
+        if (typeof noteId !== "string" || !noteId) {
+            res.status(400).json({ msg: "Invalid note ID" });
+            return;
+        }
+        const result = await prisma_1.prisma.notes.deleteMany({
+            where: {
+                id: noteId,
+                userID: userId
+            }
+        });
+        res.status(200).json({ msg: "Note deleted successfully" });
+        return;
+    }
+    catch (error) {
+        console.error("Delete note error:", error);
+        res.status(500).json({ msg: "Failed to delete note" });
+    }
+});
+exports.default = notesRouter;
+//# sourceMappingURL=notes.js.map

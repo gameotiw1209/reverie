@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import authenticateToken from "../middleware/auth";
-import { Prisma } from "../generated/client";
+import { Prisma } from "@prisma/client";
 
 const notesRouter = express.Router();
 // Brought in authenticateToken so the user doesn't need to provide
