@@ -4,6 +4,7 @@ import { Prisma } from "../generated/client";
 import bcrypt from "bcrypt";
 import authenticateToken from "../middleware/auth";
 import { prisma } from "../lib/prisma";
+import { signupLimiter, loginLimiter } from "../middleware/ratelimit";
 
 const authRouter = express.Router();
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -11,7 +12,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //as it was some prisma generate error and like yeah the way i did first it with the mongoose only a prisma.user comes in extra and 
 //also like bringing it with some structure way of making it in data property object that was it ig
 
-authRouter.post('/auth/signup',async(req:Request,res:Response) => {
+authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) => {
     try{
         const{ email,password,name }= req.body ?? {};
 
@@ -71,8 +72,7 @@ authRouter.post('/auth/signup',async(req:Request,res:Response) => {
 // the browser earlier it was directly handed to the user so like with that token he needs to get to the website but this time its damn proffesional and easy like after
 //this cookie gets into the broswer with authenticateToken in the middleware user can easily post there notes and get it 
 
-authRouter.post('/auth/login',async(req:Request,res:Response)=>{
-    console.log("LOGIN ROUTE HIT");
+authRouter.post('/auth/login', loginLimiter , async(req:Request,res:Response)=>{
     try{
         const{ email,password }= req.body ?? {};
         if (
