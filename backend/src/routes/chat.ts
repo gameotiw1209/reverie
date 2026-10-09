@@ -145,5 +145,36 @@ chatRouter.get("/notes/:id/chat",authenticateToken,async(req:Request,res:Respons
         res.status(500).json({msg:"Failed to retrieve chat history"});
     };
 
-})
+});
+chatRouter.delete("/notes/:id/chat", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const noteId = req.params.id;
+    if (!userId) {
+      res.status(401).json({ msg: "Unauthorized" });
+      return;
+    }
+    if (typeof noteId !== "string") {
+        res.status(400).json({ msg: "Invalid note ID" });
+        return;
+        }
+    const note = await prisma.notes.findFirst({
+      where: { id: noteId, userID: userId },
+      select: { id: true }
+    });
+    if (!note) {
+      res.status(404).json({ msg: "Note not found" });
+      return;
+    }
+    const result = await prisma.chatMessage.deleteMany({
+      where: { noteId, userId }
+    });
+    res.status(200).json({
+      msg: "Conversation cleared successfully",
+    });
+  } catch (error) {
+    console.error("Clear conversation error:", error);
+    res.status(500).json({ msg: "Failed to clear conversation" });
+  }
+});
 export default chatRouter;

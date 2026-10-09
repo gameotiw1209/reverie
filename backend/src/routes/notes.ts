@@ -107,11 +107,8 @@ notesRouter.delete("/notes/:id", authenticateToken, async (req: Request, res: Re
         userID: userId
       }
     });
-    if (result.count === 0) {
-      res.status(404).json({ msg: "Note not found" });
-      return;
-    }
     res.status(200).json({ msg: "Note deleted successfully" });
+    return;
   } catch (error) {
     console.error("Delete note error:", error);
     res.status(500).json({ msg: "Failed to delete note" });
