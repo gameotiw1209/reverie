@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -6,79 +5,48 @@ import { ArrowRight, Volume2, VolumeX } from "lucide-react";
 
 export default function Navbar() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const contextRef = useRef<AudioContext | null>(null);
-  const gainRef = useRef<GainNode | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const playingRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.volume = 0.5;
+
     return () => {
-      playingRef.current = false;
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (contextRef.current) void contextRef.current.close();
+      audio?.pause();
     };
   }, []);
 
-  function playChime() {
-    const context = contextRef.current;
-    const masterGain = gainRef.current;
-
-    if (!playingRef.current || !context || !masterGain) return;
-
-    const notes = [216, 288, 324, 432, 540, 648];
-    const frequency = notes[Math.floor(Math.random() * notes.length)];
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const now = context.currentTime;
-
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(frequency, now);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.04, now + 1.2);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 5.5);
-
-    oscillator.connect(gain);
-    gain.connect(masterGain);
-    oscillator.start(now);
-    oscillator.stop(now + 6);
-
-    timerRef.current = setTimeout(
-      playChime,
-      3500 + Math.random() * 3000,
-    );
-  }
-
   async function toggleSoundscape() {
-    let context = contextRef.current;
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    if (!context) {
-      context = new AudioContext();
-      const gain = context.createGain();
-      gain.gain.value = 0.08;
-      gain.connect(context.destination);
+    if (audio.paused) {
+      audio.volume = 0.5;
 
-      contextRef.current = context;
-      gainRef.current = gain;
-    }
-
-    if (context.state === "suspended") await context.resume();
-
-    if (playingRef.current) {
-      playingRef.current = false;
-      setIsPlaying(false);
-
-      if (timerRef.current) clearTimeout(timerRef.current);
-      gainRef.current?.gain.setTargetAtTime(0, context.currentTime, 0.4);
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Unable to play audio:", error);
+        setIsPlaying(false);
+      }
     } else {
-      playingRef.current = true;
-      setIsPlaying(true);
-      gainRef.current?.gain.setValueAtTime(0.08, context.currentTime);
-      playChime();
+      audio.pause();
+      setIsPlaying(false);
     }
   }
 
   return (
     <header className="relative z-20 flex w-full items-center justify-between gap-3 px-5 py-4 md:px-12">
+      <audio
+        ref={audioRef}
+        src="/20180512.mp4"
+        loop
+        preload="none"
+        onPause={() => setIsPlaying(false)}
+        onPlay={() => setIsPlaying(true)}
+      />
+
       <div className="flex min-w-0 items-center gap-4">
         <a
           href="#home"
@@ -101,12 +69,37 @@ export default function Navbar() {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div
+          className="flex h-9 items-center justify-center gap-[3px] rounded-full px-2"
+          role="img"
+          aria-label={isPlaying ? "Music playing" : "Music paused"}
+        >
+          {isPlaying ? (
+            Array.from({ length: 13 }, (_, i) => (
+              <span
+                key={i}
+                className="w-[2px] rounded-full bg-[#FFB781]"
+                style={{
+                  height: `${5 + ((i * 7 + 3) % 13)}px`,
+                  animation: `music-wave ${0.45 + (i % 5) * 0.13}s ease-in-out ${i * 0.045}s infinite alternate`,
+                  transformOrigin: "center",
+                }}
+              />
+            ))
+          ) : (
+            <span className="text-sm tracking-[3px] text-[#FFB781]/80">
+              ...
+            </span>
+          )}
+        </div>
+
         <button
           type="button"
           onClick={toggleSoundscape}
+          aria-label={isPlaying ? "Turn sound off" : "Turn sound on"}
           aria-pressed={isPlaying}
-          title="Toggle meadow soundscape"
-          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-2 text-xs text-[#FFF6E8] backdrop-blur-md transition hover:bg-white/[0.12] active:scale-95"
+          title={isPlaying ? "Turn sound off" : "Turn sound on"}
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-2 text-xs text-[#FFF6E8] backdrop-blur-md transition hover:bg-white/[0.12] active:scale-95"
         >
           {isPlaying ? (
             <Volume2 size={15} className="text-[#FFB781]" />
@@ -114,7 +107,7 @@ export default function Navbar() {
             <VolumeX size={15} className="text-[#FFB781]" />
           )}
           <span className="hidden sm:inline">
-            {isPlaying ? "Meadow Wind · 432Hz" : "Soundscape · Paused"}
+            Sound {isPlaying ? "On" : "Off"}
           </span>
         </button>
 
@@ -126,6 +119,17 @@ export default function Navbar() {
           <ArrowRight size={17} />
         </a>
       </div>
+
+      <style jsx>{`
+        @keyframes music-wave {
+          from {
+            transform: scaleY(0.25);
+          }
+          to {
+            transform: scaleY(1);
+          }
+        }
+      `}</style>
     </header>
   );
 }

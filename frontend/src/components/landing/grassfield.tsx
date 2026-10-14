@@ -371,234 +371,286 @@ function __OriginkitBase_GrassField(props: Props) {
 
     const ptrRef = useRef({ x: 0.5, y: 0.5, tx: 0.5, ty: 0.5, on: 0, onTarget: 0 })
 
-    useEffect(() => {
-        const canvas = canvasRef.current
-        if (!canvas) return
-        const gl = canvas.getContext("webgl", { antialias: true, alpha: false, depth: true })
-        if (!gl) {
-            console.error("GrassField: WebGL unavailable")
-            return
+    
+useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const gl = canvas.getContext("webgl", {
+        antialias: true,
+        alpha: false,
+        depth: true,
+    })
+
+    if (!gl) {
+        console.error("GrassField: WebGL unavailable")
+        return
+    }
+
+    const skyProg = linkProgram(gl, QUAD_VS, SKY_FS)
+    const groundProg = linkProgram(gl, GROUND_VS, FIELD_FS)
+    const bladeProg = linkProgram(gl, BLADE_VS, FIELD_FS)
+
+    if (!skyProg || !groundProg || !bladeProg) return
+
+    const su = uniformer(gl, skyProg)
+    const gu = uniformer(gl, groundProg)
+    const bu = uniformer(gl, bladeProg)
+
+    const quadBuf = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf)
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 3, -1, -1, 3]),
+        gl.STATIC_DRAW
+    )
+    const skyPos = gl.getAttribLocation(skyProg, "a_pos")
+
+    const NX = 72
+    const NZ = 58
+    const gverts: number[] = []
+    const gz = (i: number) => -(0.04 * Math.pow(46.0 / 0.04, i / NZ))
+
+    for (let i = 0; i < NZ; i++) {
+        const z0 = gz(i)
+        const z1 = gz(i + 1)
+        const s0 = 3.0 - z0 * 1.05
+        const s1 = 3.0 - z1 * 1.05
+
+        for (let j = 0; j < NX; j++) {
+            const t0 = (j / NX) * 2 - 1
+            const t1 = ((j + 1) / NX) * 2 - 1
+
+            gverts.push(
+                t0 * s0, z0,
+                t1 * s0, z0,
+                t0 * s1, z1,
+                t0 * s1, z1,
+                t1 * s0, z0,
+                t1 * s1, z1
+            )
+        }
+    }
+
+    const gArr = new Float32Array(gverts)
+    const gBuf = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, gBuf)
+    gl.bufferData(gl.ARRAY_BUFFER, gArr, gl.STATIC_DRAW)
+
+    const aXZ = gl.getAttribLocation(groundProg, "a_xz")
+    const groundCount = gArr.length / 2
+
+    const quad: [number, number][] = [
+        [0, -1], [0, 1], [0.55, -1],
+        [0.55, -1], [0, 1], [0.55, 1],
+    ]
+
+    const tip: [number, number][] = [
+        [0.55, -1], [0.55, 1], [1, 0],
+    ]
+
+    const baseArr = new Float32Array(MAX_BLADES * VERTS_PER_BLADE * 2)
+    const paramArr = new Float32Array(MAX_BLADES * VERTS_PER_BLADE * 2)
+    const randArr = new Float32Array(MAX_BLADES * VERTS_PER_BLADE * 2)
+
+    let vi = 0
+
+    for (let b = 0; b < MAX_BLADES; b++) {
+        const uu = (b * GOLDEN) % 1
+        const dist = 0.55 + 32.0 * Math.pow(uu, 1.75)
+        const z = -dist
+        const spread = 2.2 + dist * 0.85
+        const x = ((b * SILVER) % 1) * 2 * spread - spread
+        const r0 = (b * TRIBO) % 1
+        const r1 = (b * 0.5436890126920763) % 1
+
+        for (let k = 0; k < VERTS_PER_BLADE; k++) {
+            const pv = k < 6 ? quad[k] : tip[k - 6]
+
+            baseArr[vi * 2] = x
+            baseArr[vi * 2 + 1] = z
+
+            paramArr[vi * 2] = pv[0]
+            paramArr[vi * 2 + 1] = pv[1]
+
+            randArr[vi * 2] = r0
+            randArr[vi * 2 + 1] = r1
+
+            vi++
+        }
+    }
+
+    const mk = (arr: Float32Array) => {
+        const bufr = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufr)
+        gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW)
+        return bufr
+    }
+
+    const bBase = mk(baseArr)
+    const bParam = mk(paramArr)
+    const bRand = mk(randArr)
+
+    const aBase = gl.getAttribLocation(bladeProg, "a_base")
+    const aParam = gl.getAttribLocation(bladeProg, "a_param")
+    const aRand = gl.getAttribLocation(bladeProg, "a_rand")
+
+    const bind = (loc: number, bufr: WebGLBuffer | null) => {
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufr)
+        gl.enableVertexAttribArray(loc)
+        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
+    }
+
+    let raf = 0
+    let last = performance.now()
+    let clock = 0
+
+    const render = (now: number) => {
+        const dt = Math.min(0.05, (now - last) / 1000)
+        last = now
+
+        const v = vRef.current
+        clock = (clock + dt * v.speed) % 3600
+
+        const ptr = ptrRef.current
+        const k = 1 - Math.exp(-6 * dt)
+
+        ptr.on += (ptr.onTarget - ptr.on) * k
+        ptr.x += ((ptr.onTarget > 0 ? ptr.tx : 0.5) - ptr.x) * k
+        ptr.y += ((ptr.onTarget > 0 ? ptr.ty : 0.5) - ptr.y) * k
+
+        const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+        const cw = sizeRef.current.w || canvas.clientWidth || 1200
+        const ch = sizeRef.current.h || canvas.clientHeight || 800
+        const bw = Math.max(1, Math.round(cw * dpr))
+        const bh = Math.max(1, Math.round(ch * dpr))
+
+        if (canvas.width !== bw || canvas.height !== bh) {
+            canvas.width = bw
+            canvas.height = bh
         }
 
-        const skyProg = linkProgram(gl, QUAD_VS, SKY_FS)
-        const groundProg = linkProgram(gl, GROUND_VS, FIELD_FS)
-        const bladeProg = linkProgram(gl, BLADE_VS, FIELD_FS)
-        if (!skyProg || !groundProg || !bladeProg) return
+        const ar = bw / Math.max(bh, 1)
+        gl.viewport(0, 0, bw, bh)
 
-        const su = uniformer(gl, skyProg)
-        const gu = uniformer(gl, groundProg)
-        const bu = uniformer(gl, bladeProg)
+        const top = parseColor(v.top, [0.408, 0.596, 0.878])
+        const low = parseColor(v.low, [0.741, 0.843, 0.949])
+        const baseC = parseColor(v.base, [0.043, 0.114, 0.031])
+        const tipC = parseColor(v.tip, [0.361, 0.62, 0.169])
 
-        const quadBuf = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
-        const skyPos = gl.getAttribLocation(skyProg, "a_pos")
-
-        // Ground: a grid geometric in depth, so screen-space cell size stays even.
-        const NX = 72
-        const NZ = 58
-        const gverts: number[] = []
-        const gz = (i: number) => -(0.04 * Math.pow(46.0 / 0.04, i / NZ))
-        for (let i = 0; i < NZ; i++) {
-            const z0 = gz(i), z1 = gz(i + 1)
-            const s0 = 3.0 - z0 * 1.05, s1 = 3.0 - z1 * 1.05
-            for (let j = 0; j < NX; j++) {
-                const t0 = (j / NX) * 2 - 1, t1 = ((j + 1) / NX) * 2 - 1
-                gverts.push(t0 * s0, z0, t1 * s0, z0, t0 * s1, z1, t0 * s1, z1, t1 * s0, z0, t1 * s1, z1)
-            }
-        }
-        const gArr = new Float32Array(gverts)
-        const gBuf = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, gBuf)
-        gl.bufferData(gl.ARRAY_BUFFER, gArr, gl.STATIC_DRAW)
-        const aXZ = gl.getAttribLocation(groundProg, "a_xz")
-        const groundCount = gArr.length / 2
-
-        // Blades. v levels 0 / 0.55 / 1: two quad triangles plus a tip triangle.
-        const quad: [number, number][] = [
-            [0, -1], [0, 1], [0.55, -1],
-            [0.55, -1], [0, 1], [0.55, 1],
+        const haze: [number, number, number] = [
+            low[0] * v.haze + (1 - v.haze) * tipC[0],
+            low[1] * v.haze + (1 - v.haze) * tipC[1],
+            low[2] * v.haze + (1 - v.haze) * tipC[2],
         ]
-        const tip: [number, number][] = [[0.55, -1], [0.55, 1], [1, 0]]
 
-        const baseArr = new Float32Array(MAX_BLADES * VERTS_PER_BLADE * 2)
-        const paramArr = new Float32Array(MAX_BLADES * VERTS_PER_BLADE * 2)
-        const randArr = new Float32Array(MAX_BLADES * VERTS_PER_BLADE * 2)
-        let vi = 0
-        for (let b = 0; b < MAX_BLADES; b++) {
-            const uu = (b * GOLDEN) % 1
-            const dist = 0.55 + 32.0 * Math.pow(uu, 1.75)
-            const z = -dist
-            const spread = 2.2 + dist * 0.85
-            const x = ((b * SILVER) % 1) * 2 * spread - spread
-            const r0 = (b * TRIBO) % 1
-            const r1 = (b * 0.5436890126920763) % 1
-            for (let k = 0; k < VERTS_PER_BLADE; k++) {
-                const pv = k < 6 ? quad[k] : tip[k - 6]
-                baseArr[vi * 2] = x
-                baseArr[vi * 2 + 1] = z
-                paramArr[vi * 2] = pv[0]
-                paramArr[vi * 2 + 1] = pv[1]
-                randArr[vi * 2] = r0
-                randArr[vi * 2 + 1] = r1
-                vi++
+        gl.clearColor(low[0], low[1], low[2], 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        gl.disable(gl.BLEND)
+        gl.disable(gl.DEPTH_TEST)
+        gl.depthMask(false)
+
+        gl.useProgram(skyProg)
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf)
+        gl.enableVertexAttribArray(skyPos)
+        gl.vertexAttribPointer(skyPos, 2, gl.FLOAT, false, 0, 0)
+
+        gl.uniform2f(su("uRes"), bw, bh)
+        gl.uniform1f(su("uTime"), clock)
+        gl.uniform3f(su("uTop"), top[0], top[1], top[2])
+        gl.uniform3f(su("uLow"), low[0], low[1], low[2])
+        gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+        const nx = (ptr.x * 2 - 1) * ar / FOCAL
+        const ny = ((1 - ptr.y) * 2 - 1) / FOCAL
+        const cp = Math.cos(PITCH)
+        const sp = Math.sin(PITCH)
+        const dx = nx
+        const dy = ny * cp - sp
+        const dz = -ny * sp - cp
+
+        let pushX = 0
+        let pushZ = -999
+        let amt = 0
+
+        if (dy < -1e-3) {
+            const s = -EYE_Y / dy
+
+            if (s > 0 && s < 42) {
+                pushX = s * dx
+                pushZ = s * dz
+                amt = Math.min(1, ptr.on) * v.hover * 0.6
             }
         }
-        const mk = (arr: Float32Array) => {
-            const bufr = gl.createBuffer()
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufr)
-            gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW)
-            return bufr
-        }
-        const bBase = mk(baseArr)
-        const bParam = mk(paramArr)
-        const bRand = mk(randArr)
-        const aBase = gl.getAttribLocation(bladeProg, "a_base")
-        const aParam = gl.getAttribLocation(bladeProg, "a_param")
-        const aRand = gl.getAttribLocation(bladeProg, "a_rand")
 
-        const bind = (loc: number, bufr: WebGLBuffer | null) => {
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufr)
-            gl.enableVertexAttribArray(loc)
-            gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
-        }
+        gl.enable(gl.DEPTH_TEST)
+        gl.depthFunc(gl.LEQUAL)
+        gl.depthMask(true)
 
-        let raf = 0
-        let last = performance.now()
-        let clock = 0
+        gl.useProgram(groundProg)
+        bind(aXZ, gBuf)
 
-        const render = (now: number) => {
-            const dt = Math.min(0.05, (now - last) / 1000)
-            last = now
-            const v = vRef.current
+        gl.uniform1f(gu("uAspect"), ar)
+        gl.uniform1f(gu("uF"), FOCAL)
+        gl.uniform3f(gu("uEye"), 0, EYE_Y, 0)
+        gl.uniform1f(gu("uPitch"), PITCH)
+        gl.uniform1f(gu("uTerrain"), v.terrain)
+        gl.uniform3f(gu("uBase"), baseC[0], baseC[1], baseC[2])
+        gl.uniform3f(gu("uHaze"), haze[0], haze[1], haze[2])
+        gl.drawArrays(gl.TRIANGLES, 0, groundCount)
 
-            clock = (clock + dt * v.speed) % 3600
+        gl.useProgram(bladeProg)
+        bind(aBase, bBase)
+        bind(aParam, bParam)
+        bind(aRand, bRand)
 
-            const ptr = ptrRef.current
-            const k = 1 - Math.exp(-6 * dt)
-            ptr.on += (ptr.onTarget - ptr.on) * k
-            ptr.x += ((ptr.onTarget > 0 ? ptr.tx : 0.5) - ptr.x) * k
-            ptr.y += ((ptr.onTarget > 0 ? ptr.ty : 0.5) - ptr.y) * k
+        gl.uniform1f(bu("uTime"), clock)
+        gl.uniform1f(bu("uAspect"), ar)
+        gl.uniform1f(bu("uF"), FOCAL)
+        gl.uniform3f(bu("uEye"), 0, EYE_Y, 0)
+        gl.uniform1f(bu("uPitch"), PITCH)
+        gl.uniform2f(bu("uPush"), pushX, pushZ)
+        gl.uniform1f(bu("uPushAmt"), amt)
+        gl.uniform1f(bu("uReach"), v.reach)
+        gl.uniform1f(bu("uHeight"), v.bladeHeight)
+        gl.uniform1f(bu("uWind"), v.strength)
+        gl.uniform1f(bu("uGust"), v.gust)
+        gl.uniform2f(bu("uWindDir"), v.dir[0], v.dir[1])
+        gl.uniform1f(bu("uTerrain"), v.terrain)
+        gl.uniform3f(bu("uBase"), baseC[0], baseC[1], baseC[2])
+        gl.uniform3f(bu("uTip"), tipC[0], tipC[1], tipC[2])
+        gl.uniform3f(bu("uHaze"), haze[0], haze[1], haze[2])
 
-            const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
-            const cw = sizeRef.current.w || canvas.clientWidth || 1200
-            const ch = sizeRef.current.h || canvas.clientHeight || 800
-            const bw = Math.max(1, Math.round(cw * dpr))
-            const bh = Math.max(1, Math.round(ch * dpr))
-            if (canvas.width !== bw || canvas.height !== bh) {
-                canvas.width = bw
-                canvas.height = bh
-            }
-            const ar = bw / Math.max(bh, 1)
-            gl.viewport(0, 0, bw, bh)
+        gl.drawArrays(gl.TRIANGLES, 0, v.count * VERTS_PER_BLADE)
 
-            const top = parseColor(v.top, [0.408, 0.596, 0.878])
-            const low = parseColor(v.low, [0.741, 0.843, 0.949])
-            const baseC = parseColor(v.base, [0.043, 0.114, 0.031])
-            const tipC = parseColor(v.tip, [0.361, 0.62, 0.169])
-            const haze: [number, number, number] = [
-                low[0] * v.haze + (1 - v.haze) * tipC[0],
-                low[1] * v.haze + (1 - v.haze) * tipC[1],
-                low[2] * v.haze + (1 - v.haze) * tipC[2],
-            ]
-
-            gl.clearColor(low[0], low[1], low[2], 1)
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-            gl.disable(gl.BLEND)
-
-            gl.disable(gl.DEPTH_TEST)
-            gl.depthMask(false)
-            gl.useProgram(skyProg)
-            gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf)
-            gl.enableVertexAttribArray(skyPos)
-            gl.vertexAttribPointer(skyPos, 2, gl.FLOAT, false, 0, 0)
-            gl.uniform2f(su("uRes"), bw, bh)
-            gl.uniform1f(su("uTime"), clock)
-            gl.uniform3f(su("uTop"), top[0], top[1], top[2])
-            gl.uniform3f(su("uLow"), low[0], low[1], low[2])
-            gl.drawArrays(gl.TRIANGLES, 0, 3)
-
-            // Pointer ray -> ground plane y = 0. Camera basis at a downward
-            // pitch a: right (1,0,0), up (0,cos a,-sin a), fwd (0,-sin a,-cos a).
-            const nx = (ptr.x * 2 - 1) * ar / FOCAL
-            const ny = ((1 - ptr.y) * 2 - 1) / FOCAL
-            const cp = Math.cos(PITCH), sp = Math.sin(PITCH)
-            const dx = nx
-            const dy = ny * cp - sp
-            const dz = -ny * sp - cp
-            let pushX = 0, pushZ = -999, amt = 0
-            if (dy < -1e-3) {
-                const s = -EYE_Y / dy
-                if (s > 0 && s < 42) {
-                    pushX = s * dx
-                    pushZ = s * dz
-                    amt = Math.min(1, ptr.on) * v.hover * 0.6
-                }
-            }
-
-            gl.enable(gl.DEPTH_TEST)
-            gl.depthFunc(gl.LEQUAL)
-            gl.depthMask(true)
-
-            gl.useProgram(groundProg)
-            bind(aXZ, gBuf)
-            gl.uniform1f(gu("uAspect"), ar)
-            gl.uniform1f(gu("uF"), FOCAL)
-            gl.uniform3f(gu("uEye"), 0, EYE_Y, 0)
-            gl.uniform1f(gu("uPitch"), PITCH)
-            gl.uniform1f(gu("uTerrain"), v.terrain)
-            gl.uniform3f(gu("uBase"), baseC[0], baseC[1], baseC[2])
-            gl.uniform3f(gu("uHaze"), haze[0], haze[1], haze[2])
-            gl.drawArrays(gl.TRIANGLES, 0, groundCount)
-
-            gl.useProgram(bladeProg)
-            bind(aBase, bBase)
-            bind(aParam, bParam)
-            bind(aRand, bRand)
-            gl.uniform1f(bu("uTime"), clock)
-            gl.uniform1f(bu("uAspect"), ar)
-            gl.uniform1f(bu("uF"), FOCAL)
-            gl.uniform3f(bu("uEye"), 0, EYE_Y, 0)
-            gl.uniform1f(bu("uPitch"), PITCH)
-            gl.uniform2f(bu("uPush"), pushX, pushZ)
-            gl.uniform1f(bu("uPushAmt"), amt)
-            gl.uniform1f(bu("uReach"), v.reach)
-            gl.uniform1f(bu("uHeight"), v.bladeHeight)
-            gl.uniform1f(bu("uWind"), v.strength)
-            gl.uniform1f(bu("uGust"), v.gust)
-            gl.uniform2f(bu("uWindDir"), v.dir[0], v.dir[1])
-            gl.uniform1f(bu("uTerrain"), v.terrain)
-            gl.uniform3f(bu("uBase"), baseC[0], baseC[1], baseC[2])
-            gl.uniform3f(bu("uTip"), tipC[0], tipC[1], tipC[2])
-            gl.uniform3f(bu("uHaze"), haze[0], haze[1], haze[2])
-            gl.drawArrays(gl.TRIANGLES, 0, v.count * VERTS_PER_BLADE)
-
-            raf = requestAnimationFrame(render)
-        }
-
-        const track = (e: PointerEvent) => {
-            const r = canvas.getBoundingClientRect()
-            if (r.width <= 0 || r.height <= 0) return
-            ptrRef.current.tx = clampN((e.clientX - r.left) / r.width, 0, 1)
-            ptrRef.current.ty = clampN((e.clientY - r.top) / r.height, 0, 1)
-            ptrRef.current.onTarget = 1
-        }
-        const onLeave = () => {
-            ptrRef.current.onTarget = 0
-        }
-
-        canvas.addEventListener("pointermove", track)
-        canvas.addEventListener("pointerenter", track)
-        canvas.addEventListener("pointerleave", onLeave)
         raf = requestAnimationFrame(render)
+    }
 
-        return () => {
-            cancelAnimationFrame(raf)
-            canvas.removeEventListener("pointermove", track)
-            canvas.removeEventListener("pointerenter", track)
-            canvas.removeEventListener("pointerleave", onLeave)
-        }
-    }, [])
+    const track = (e: PointerEvent) => {
+        const r = canvas.getBoundingClientRect()
+        if (r.width <= 0 || r.height <= 0) return
+
+        ptrRef.current.tx = clampN((e.clientX - r.left) / r.width, 0, 1)
+        ptrRef.current.ty = clampN((e.clientY - r.top) / r.height, 0, 1)
+        ptrRef.current.onTarget = 1
+    }
+
+    const onLeave = () => {
+        ptrRef.current.onTarget = 0
+    }
+
+    window.addEventListener("pointermove", track)
+    window.addEventListener("blur", onLeave)
+
+    raf = requestAnimationFrame(render)
+
+    return () => {
+        cancelAnimationFrame(raf)
+        window.removeEventListener("pointermove", track)
+        window.removeEventListener("blur", onLeave)
+    }
+}, [])
+
 
     return (
         <div
