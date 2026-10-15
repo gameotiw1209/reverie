@@ -7,9 +7,10 @@ import { ArrowRight, AlertCircle, Eye, EyeOff, Lock, X,} from "lucide-react";
 
 type SignInFormProps = {
   onClose?: () => void;
+  onSwitchToSignUp?: () => void;
 };
 
-export default function SignInForm({ onClose }: SignInFormProps) {
+export default function SignInForm({ onClose, onSwitchToSignUp }: SignInFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,7 +56,7 @@ export default function SignInForm({ onClose }: SignInFormProps) {
   };
 
   return (
-    <div className="relative mx-auto w-full max-w-[450px] rounded-[24px] border border-white/10 bg-[#151310]/95 p-6 shadow-[0_0_45px_-5px_rgba(253,140,32,0.22),0_25px_50px_-12px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:p-8">
+    <div className="relative mx-auto w-full max-w-[450px] rounded-[24px] border border-white/10 bg-[#151310]/95 p-6 shadow-[0_0_45px_-5px_rgba(253,140,32,0.22),0_25px_50px_-12px_rgba(0,0,0,0.85)] sm:p-8">
       <button
         type="button"
         aria-label="Close sign in"
@@ -78,7 +79,7 @@ export default function SignInForm({ onClose }: SignInFormProps) {
         </h1>
 
         <p className="font-jakarta text-sm text-[#FFF5E1]/70">
-          Welcome back! Pick up where you left off.
+        Welcome back! Pick up where you left off.
         </p>
       </div>
 
@@ -170,14 +171,15 @@ export default function SignInForm({ onClose }: SignInFormProps) {
       </form>
 
       <div className="mt-5 text-center font-jakarta text-xs text-[#FFF5E1]/90">
-        Don't have an account?
-        <a
-          href="/sign-up"
-          className="ml-1 inline-block font-medium text-[#FD8C20] transition-colors hover:underline"
-        >
-          Sign up
-        </a>
-      </div>
+      Don't have an account?
+      <button
+    type="button"
+    onClick={onSwitchToSignUp}
+    className="ml-1 inline-block font-medium text-[#FD8C20] transition-colors hover:underline"
+  >
+    Sign up
+  </button>
+</div>
 
       <div className="mt-3.5 flex items-center justify-center gap-1.5 font-jakarta text-[11px] tracking-wide text-[#FFF5E1]/40">
         <Lock size={13} />

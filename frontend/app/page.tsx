@@ -7,15 +7,18 @@ import Navbar from "../src/components/landing/navbar";
 import HeroSection from "../src/components/landing/herosection";
 import SiteFooter from "../src/components/landing/footer";
 import SignInForm from "../src/components/auth/signinForm";
+import SignUpForm from "../src/components/auth/signupForm";
+
+type AuthView = "signin" | "signup" | null;
 
 export default function Home() {
-  const [showSignIn, setShowSignIn] = useState(false);
+  const [authView, setAuthView] = useState<AuthView>(null);
 
   useEffect(() => {
-    if (!showSignIn) return;
+    if (!authView) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setShowSignIn(false);
+      if (event.key === "Escape") setAuthView(null);
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -25,17 +28,17 @@ export default function Home() {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [showSignIn]);
+  }, [authView]);
 
   return (
     <div className="relative isolate min-h-dvh overflow-x-clip bg-[#131313] text-[#E5E2E1]">
       <div
         className={
-          showSignIn
+          authView
             ? "pointer-events-none relative flex min-h-dvh flex-col blur-[5px] transition-[filter] duration-300"
             : "relative flex min-h-dvh flex-col transition-[filter] duration-300"
         }
-        aria-hidden={showSignIn}
+        aria-hidden={Boolean(authView)}
       >
         <div className="absolute inset-0 z-0">
           <GrassField
@@ -67,30 +70,47 @@ export default function Home() {
         />
 
         <div className="relative z-10 flex min-h-dvh flex-col">
-          <Navbar onGetStarted={() => setShowSignIn(true)} />
+          <Navbar onGetStarted={() => setAuthView("signin")} />
           <main className="flex flex-1 items-center">
             <HeroSection />
           </main>
           <SiteFooter />
         </div>
       </div>
-      {showSignIn && (
+
+      {authView && (
         <div
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 px-4 py-8 backdrop-blur-[5px]"
-        onMouseDown={(event) => {
-          if (event.target === event.currentTarget) {
-            setShowSignIn(false);
-           }
-          }}>
-            <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 px-4 py-8"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setAuthView(null);
+            }
+          }}
+        >
+          <div
             role="dialog"
             aria-modal="true"
-            aria-labelledby="sign-in-heading"
-            className="relative my-auto w-full max-w-[450px]" >
-            <SignInForm onClose={() => setShowSignIn(false)} />
-             </div>
-             </div>
+            aria-labelledby={
+              authView === "signin"
+                ? "sign-in-heading"
+                : "sign-up-heading"
+            }
+            className="relative my-auto w-full max-w-[450px]"
+          >
+            {authView === "signin" ? (
+              <SignInForm
+                onClose={() => setAuthView(null)}
+                onSwitchToSignUp={() => setAuthView("signup")}
+              />
+            ) : (
+              <SignUpForm
+                onClose={() => setAuthView(null)}
+                onSwitchToSignIn={() => setAuthView("signin")}
+              />
             )}
-            </div>
-            );
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

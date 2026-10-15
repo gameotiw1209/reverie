@@ -15,7 +15,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Reverie — A thoughtful space for your thoughts",
+  title: "Reverie Notes App",
   description:
     "An AI-powered journal to organise your notes and reflect on your thoughts.",
 };
