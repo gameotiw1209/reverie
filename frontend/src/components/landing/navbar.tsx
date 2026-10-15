@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Volume2, VolumeX } from "lucide-react";
 
-export default function Navbar() {
+type NavbarProps = {
+  onGetStarted: () => void;
+};
+
+export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -21,7 +25,7 @@ export default function Navbar() {
     if (!audio) return;
 
     if (audio.paused) {
-      audio.volume = 0.5;
+      audio.volume = 0.3;
 
       try {
         await audio.play();
@@ -111,15 +115,13 @@ export default function Navbar() {
           </span>
         </button>
 
-        <a
-          href="#get-started"
-          className="glow-sunset inline-flex items-center gap-2 rounded-full bg-[#FFDCC4] px-4 py-2.5 text-sm font-semibold text-[#2F1400] transition hover:scale-[1.03] active:scale-95 sm:px-6"
-        >
-          Get Started
-          <ArrowRight size={17} />
-        </a>
-      </div>
-
+        <button
+        type="button"
+         onClick={onGetStarted}
+         className="glow-sunset inline-flex items-center gap-2 rounded-full bg-[#FFDCC4] px-4 py-2.5 text-sm font-semibold text-[#2F1400] transition hover:scale-[1.03] active:scale-95 sm:px-6">
+          Get Started <ArrowRight size={17} />
+          </button>
+          </div>
       <style jsx>{`
         @keyframes music-wave {
           from {
