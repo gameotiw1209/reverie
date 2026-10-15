@@ -4,7 +4,7 @@
 import * as React from "react"
 import { useEffect, useRef } from "react"
 
-const MAX_DPR = 2
+const MAX_DPR = 1.5
 const MAX_BLADES = 40000
 const VERTS_PER_BLADE = 9
 const GOLDEN = 0.6180339887498949
@@ -501,13 +501,21 @@ useEffect(() => {
         gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
     }
 
-    let raf = 0
-    let last = performance.now()
-    let clock = 0
+   let raf = 0
+let last = performance.now()
+let lastFrame = 0
+let clock = 0
+const frameInterval = 1000 / 30
 
-    const render = (now: number) => {
-        const dt = Math.min(0.05, (now - last) / 1000)
-        last = now
+const render = (now: number) => {
+    if (now - lastFrame < frameInterval) {
+        raf = requestAnimationFrame(render)
+        return
+    }
+
+    const dt = Math.min(0.05, (now - last) / 1000)
+    last = now
+    lastFrame = now
 
         const v = vRef.current
         clock = (clock + dt * v.speed) % 3600
@@ -677,6 +685,7 @@ const __originkitPresetProps = {
   "background": "#FD8C20",
   "horizon": "#FF8B2C",
   "speed": 62,
+  "density":55,
   "field": {
     "haze": 97,
     "terrain": 120,

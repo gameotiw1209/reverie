@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -70,6 +71,9 @@ const timePeriods = [
   },
 ];
 
+const MAX_LINES = 6;
+const LINE_HEIGHT = 28;
+
 function getCurrentPeriod(hour: number) {
   return (
     timePeriods.find((period) =>
@@ -88,7 +92,8 @@ function getLocalDate(date: Date) {
 }
 
 export default function JournalCard() {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState("");
   const [promptIndex, setPromptIndex] = useState(0);
   const [reflection, setReflection] = useState("");
@@ -97,11 +102,9 @@ export default function JournalCard() {
 
   useEffect(() => {
     const updateTime = () => setNow(new Date());
-
     updateTime();
 
     const interval = window.setInterval(updateTime, 60_000);
-
     return () => window.clearInterval(interval);
   }, []);
 
@@ -121,6 +124,37 @@ export default function JournalCard() {
   useEffect(() => {
     setPromptIndex(0);
   }, [period.name]);
+
+  function fitsWithinSixLines(text: string) {
+    const textarea = inputRef.current;
+    const measure = measureRef.current;
+
+    if (!textarea || !measure) return true;
+
+    const style = window.getComputedStyle(textarea);
+
+    measure.style.width = `${textarea.clientWidth}px`;
+    measure.style.fontFamily = style.fontFamily;
+    measure.style.fontSize = style.fontSize;
+    measure.style.fontWeight = style.fontWeight;
+    measure.style.fontStyle = style.fontStyle;
+    measure.style.letterSpacing = style.letterSpacing;
+    measure.style.wordSpacing = style.wordSpacing;
+    measure.style.lineHeight = `${LINE_HEIGHT}px`;
+    measure.style.whiteSpace = "pre-wrap";
+    measure.style.overflowWrap = "break-word";
+    measure.style.wordBreak = "normal";
+
+    measure.textContent = text || " ";
+
+    return measure.getBoundingClientRect().height <= MAX_LINES * LINE_HEIGHT + 0.5;
+  }
+
+  function handleTextChange(nextValue: string) {
+    if (fitsWithinSixLines(nextValue)) {
+      setValue(nextValue);
+    }
+  }
 
   function beginReflection() {
     const thought = value.trim();
@@ -145,10 +179,10 @@ export default function JournalCard() {
       >
         <div className="absolute -left-2.5 -top-2.5 h-[280px] w-full rounded-2xl bg-[#91ACCC]/80 transition-transform duration-300 group-hover:-translate-x-1 group-hover:-translate-y-1" />
 
-        <div className="relative z-10 flex h-[280px] w-full -rotate-1 flex-col justify-between rounded-2xl bg-[#FFF5E1] p-5 text-[#1E1B18] shadow-2xl transition-transform duration-300 group-hover:rotate-0">
-          <div>
+        <div className="relative z-10 flex h-[280px] w-full -rotate-1 flex-col rounded-2xl bg-[#FFF5E1] p-5 text-[#1E1B18] shadow-2xl transition-transform duration-300 group-hover:rotate-0">
+          <div className="flex min-h-0 flex-1 flex-col">
             <div
-              className="flex items-center justify-between gap-2 border-b border-[#AEC9EB]/60 pb-2 text-[10px] font-bold tracking-[0.12em] text-[#2E4965]"
+              className="flex shrink-0 items-center justify-between gap-2 border-b border-[#AEC9EB]/60 pb-2 text-[10px] font-bold tracking-[0.12em] text-[#2E4965]"
               style={{ fontFamily: "var(--font-jakarta), sans-serif" }}
             >
               <span className="flex min-w-0 items-center gap-1.5">
@@ -165,54 +199,62 @@ export default function JournalCard() {
             </div>
 
             <div
-              className="relative mt-2 text-lg leading-8 text-[#2B2724]"
-              style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
+              className="relative mt-2 min-h-0 flex-1 text-base leading-7 text-[#2B2724]"
+              style={{
+                fontFamily: "var(--font-newsreader), Georgia, serif",
+                backgroundImage:
+                  "repeating-linear-gradient(to bottom, transparent 0px, transparent 27px, rgba(174,201,235,0.6) 27px, rgba(174,201,235,0.6) 28px)",
+              }}
             >
-              <div className="ruled-line flex items-center overflow-hidden">
-                <span className="mr-2 inline-block h-5 w-[2px] shrink-0 animate-pulse rounded-full bg-[#FD8C20]" />
+              <span className="pointer-events-none absolute -left-0.5 top-[7px] z-20 h-5 w-[2px] animate-pulse rounded-full bg-[#FD8C20]" />
 
-                <div className="relative flex w-full items-center">
-                  {!value && (
-                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center truncate text-sm italic text-stone-500/80">
-                      {period.prompts[promptIndex % period.prompts.length]}
-                    </span>
-                  )}
+              {!value && (
+                <span className="pointer-events-none absolute left-2 top-0 z-10 text-sm italic leading-7 text-stone-500/80">
+                  {period.prompts[promptIndex % period.prompts.length]}
+                </span>
+              )}
 
-                  <input
-                    ref={inputRef}
-                    value={value}
-                    onChange={(event) => {
-                      const nextValue = event.target.value;
-                      setValue(nextValue);
+              <textarea
+                ref={inputRef}
+                value={value}
+                onChange={(event) => handleTextChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    beginReflection();
+                  }
+                }}
+                rows={MAX_LINES}
+                wrap="soft"
+                autoComplete="off"
+                spellCheck={false}
+                aria-label="Write a journal thought"
+                className="relative z-10 block h-full w-full resize-none overflow-hidden whitespace-pre-wrap border-0 bg-transparent p-0 pl-2 text-base leading-7 text-[#2B2724] outline-none ring-0 focus:outline-none focus:ring-0"
+                style={{
+                  overflowWrap: "break-word",
+                  wordBreak: "normal",
+                }}
+              />
 
-                      if (showReflection && nextValue.trim()) {
-                        setReflection(
-                          `Noticing: “${nextValue.trim()}” — take a deep breath. What does this bring to the surface?`,
-                        );
-                      }
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        beginReflection();
-                      }
-                    }}
-                    autoComplete="off"
-                    spellCheck={false}
-                    aria-label="Write a journal thought"
-                    className="relative z-10 h-full w-full border-0 bg-transparent p-0 text-base leading-8 text-[#2B2724] outline-none ring-0 focus:outline-none focus:ring-0"
-                  />
-                </div>
-              </div>
-
-              {Array.from({ length: 4 }, (_, index) => (
-                <div key={index} className="ruled-line" />
-              ))}
+              <div
+                ref={measureRef}
+                aria-hidden="true"
+                className="pointer-events-none invisible absolute left-2 top-0"
+                style={{
+                  boxSizing: "border-box",
+                  whiteSpace: "pre-wrap",
+                  overflowWrap: "break-word",
+                  wordBreak: "normal",
+                  lineHeight: `${LINE_HEIGHT}px`,
+                  padding: 0,
+                  margin: 0,
+                }}
+              />
             </div>
           </div>
 
           <div
-            className="flex items-center justify-between pt-1 text-[11px] text-[#2E4965]/60"
+            className="flex shrink-0 items-center justify-between pt-2 text-[11px] text-[#2E4965]/60"
             style={{ fontFamily: "var(--font-jakarta), sans-serif" }}
           >
             <span className="flex items-center gap-1">
