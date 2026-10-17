@@ -50,7 +50,7 @@ export default function SignUpForm({
         }),
       });
 
-      router.push("/home");
+      router.push("/home/notes");
       router.refresh();
     } catch (err) {
       setError(

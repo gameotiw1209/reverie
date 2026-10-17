@@ -34,7 +34,7 @@ export default function SignInForm({ onClose, onSwitchToSignUp }: SignInFormProp
         }),
       });
 
-      router.push("/home");
+      router.push("/home/notes");
       router.refresh();
     } catch (err) {
       setError(

@@ -103,3 +103,42 @@ canvas {
 ::selection {
   background: rgba(255, 183, 129, 0.3);
 }
+
+@theme inline {
+  --font-instrument: var(--font-instrument-serif);
+}
+
+.ruled-paper {
+  background-color: #fff8eb;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 35px,
+    rgba(156, 163, 175, 0.28) 35px,
+    rgba(156, 163, 175, 0.28) 36px
+  );
+  background-position: 0 10px;
+}
+
+.paper-texture {
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 24px 48px -12px rgba(15, 23, 42, 0.35),
+    -6px 0 16px -4px rgba(0, 0, 0, 0.2);
+}
+
+.spiral-spine-shadow {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.03) 40%,
+    transparent 100%
+  );
+}
+
+.hole-punch {
+  box-shadow:
+    inset 1px 1.5px 3px rgba(0, 0, 0, 0.55),
+    0 1px 1px rgba(255, 255, 255, 0.7);
+}
