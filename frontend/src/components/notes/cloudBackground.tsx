@@ -326,7 +326,6 @@ function __OriginkitBase_CloudSky(props: Props) {
 
         let raf = 0
         let last = performance.now()
-
         let nearX = 0
         let farX = 0
         let cirrusX = 0
@@ -386,29 +385,28 @@ function __OriginkitBase_CloudSky(props: Props) {
         }
 
         const track = (e: PointerEvent) => {
-            const r = canvas.getBoundingClientRect()
-            if (r.width <= 0 || r.height <= 0) return
-            ptrRef.current.x = ((e.clientX - r.left) / r.width) * 2 - 1
-            ptrRef.current.y = 1 - ((e.clientY - r.top) / r.height) * 2
-            ptrRef.current.inside = true
-        }
+        const r = canvas.getBoundingClientRect();
+         if (r.width <= 0 || r.height <= 0) return;
+          ptrRef.current.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+          ptrRef.current.y = 1 - ((e.clientY - r.top) / r.height) * 2;
+          ptrRef.current.inside =
+          e.clientX >= r.left &&
+          e.clientX <= r.right &&
+          e.clientY >= r.top &&
+          e.clientY <= r.bottom;
+        };
         const onLeave = () => {
-            ptrRef.current.inside = false
-        }
-
-        canvas.addEventListener("pointermove", track)
-        canvas.addEventListener("pointerenter", track)
-        canvas.addEventListener("pointerleave", onLeave)
-
-        raf = requestAnimationFrame(render)
-
-        return () => {
-            cancelAnimationFrame(raf)
-            canvas.removeEventListener("pointermove", track)
-            canvas.removeEventListener("pointerenter", track)
-            canvas.removeEventListener("pointerleave", onLeave)
-        }
-    }, [])
+        ptrRef.current.inside = false;
+    };
+    window.addEventListener("pointermove", track);
+    window.addEventListener("blur", onLeave);
+    raf = requestAnimationFrame(render);
+    return () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("pointermove", track);
+        window.removeEventListener("blur", onLeave);
+    };
+    }, []);
 
     return (
         <div
@@ -434,7 +432,7 @@ function __OriginkitBase_CloudSky(props: Props) {
 
 const __originkitPresetProps = {
   "background": "#005BFF",
-  "speed": 67,
+  "speed": 87,
   "clouds": {
     "cirrus": 100,
     "shadow": 70,

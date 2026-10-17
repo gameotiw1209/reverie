@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Check, Share2, Volume2, VolumeX } from "lucide-react";
@@ -30,15 +29,22 @@ export default function NotesToolbar({
             saving ? "animate-pulse bg-amber-300" : "bg-emerald-400"
           }`}
         />
-        <span className="font-newsreader text-sm italic">Quiet headspace</span>
+        <span className="font-newsreader text-sm italic">
+          Quiet headspace
+        </span>
         <span className="text-white/40">•</span>
         <span className="text-white/80">
-          {saving ? "Saving..." : dirty ? "Unsaved changes" : "All changes saved"}
+          {saving
+            ? "Saving..."
+            : dirty
+              ? "Unsaved changes"
+              : "All changes saved"}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={onShare}
           disabled={!hasNote}
           className="flex items-center gap-1.5 rounded-full border border-white/30 bg-black/25 px-4 py-2 text-xs font-medium text-white shadow-sm backdrop-blur-md transition hover:bg-black/35 disabled:opacity-40"
@@ -48,6 +54,7 @@ export default function NotesToolbar({
         </button>
 
         <button
+          type="button"
           onClick={onSave}
           disabled={saving || !dirty}
           className="flex items-center gap-1.5 rounded-full border border-amber-200/80 bg-[#FFF5E1] px-4 py-2 text-xs font-semibold text-slate-900 shadow-[0_4px_14px_rgba(255,245,225,0.25)] transition hover:bg-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
@@ -57,9 +64,15 @@ export default function NotesToolbar({
         </button>
 
         <button
+          type="button"
           onClick={onToggleSound}
-          aria-label={soundEnabled ? "Mute ambient sound" : "Enable ambient sound"}
-          title={soundEnabled ? "Mute ambient sound" : "Enable ambient sound"}
+          aria-label={
+            soundEnabled ? "Mute ambient sound" : "Enable ambient sound"
+          }
+          aria-pressed={soundEnabled}
+          title={
+            soundEnabled ? "Mute ambient sound" : "Enable ambient sound"
+          }
           className="flex items-center justify-center rounded-full border border-white/20 bg-black/30 p-2 text-white/90 shadow-sm backdrop-blur-md transition hover:bg-black/40"
         >
           {soundEnabled ? (

@@ -15,11 +15,10 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400"],
   style: ["normal", "italic"],
-  display: "swap",
+  variable: "--font-instrument-serif",
 });
 
 export const metadata: Metadata = {
@@ -35,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" data-scroll-behavior="smooth">
-      <body className={`${newsreader.variable} ${jakarta.variable}`}>
+      <body className={`${newsreader.variable} ${jakarta.variable} ${instrumentSerif.variable}`}>
         {children}
       </body>
     </html>

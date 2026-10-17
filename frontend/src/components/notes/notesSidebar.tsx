@@ -2,19 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  House,
-  Search,
-  Plus,
-  Sparkles,
-  MoreHorizontal,
-  Trash2,
-  LogOut,
-  PanelLeft,
-  X,
-} from "lucide-react";
+import { ChevronLeft,ChevronRight,House,Search,Plus,Sparkles,MoreHorizontal,Trash2,LogOut,PanelLeft,X,} from "lucide-react";
 
 export type Note = {
   id: string;
@@ -87,7 +75,7 @@ export default function NotesSidebar({
   }
 
   return (
-    <aside className="relative z-30 flex h-full w-[290px] shrink-0 flex-col justify-between overflow-hidden border-r border-white/10 bg-[#15171C]/90 text-white/90 shadow-2xl backdrop-blur-xl max-md:fixed max-md:inset-y-3 max-md:left-3 max-md:h-[calc(100dvh-1.5rem)] max-md:rounded-2xl">
+    <aside className="relative z-30 flex h-full w-[290px] shrink-0 flex-col justify-between overflow-hidden border-r border-white/10 bg-[#15171C]/60 text-white/90 shadow-2xl backdrop-blur-xl backdrop-saturate-150 max-md:fixed max-md:inset-y-3 max-md:left-3 max-md:h-[calc(100dvh-1.5rem)] max-md:rounded-2xl">
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4">
         <div className="flex items-center justify-between px-2 pt-1">
           <span className="flex items-center gap-2 font-instrument text-2xl italic tracking-wide text-white">

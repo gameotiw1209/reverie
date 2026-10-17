@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/lib/api";
 import CloudSky from "@/src/components/notes/cloudBackground";
@@ -26,6 +25,8 @@ export default function NotesPage() {
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const selectedNote = notes.find((note) => note.id === selectedId) ?? null;
 
@@ -63,19 +64,53 @@ export default function NotesPage() {
       }
 
       setDirty(false);
-    } catch (error) {
-  console.error("Notes page authentication/loading error:", error);
-  setError(
-    error instanceof Error ? error.message : "Failed to load notes."
-  );
-}finally {
+    } catch (err) {
+      console.error("Notes page authentication/loading error:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load notes.",
+      );
+    } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const audio = new Audio("/20180512.mp4");
+    audio.loop = true;
+    audio.volume = 0.25;
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const toggleSound = useCallback(async () => {
+    const audio = audioRef.current;
+
+    if (!audio) return;
+
+    if (soundEnabled) {
+      audio.pause();
+      setSoundEnabled(false);
+      return;
+    }
+
+    try {
+      await audio.play();
+      setSoundEnabled(true);
+      setError("");
+    } catch (err) {
+      console.error("Ambient audio playback error:", err);
+      setError("Unable to play ambient audio. Check public/20180512.mp4.");
+      setSoundEnabled(false);
+    }
+  }, [soundEnabled]);
 
   const selectNote = useCallback((note: Note) => {
     setSelectedId(note.id);
@@ -212,12 +247,15 @@ export default function NotesPage() {
 
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
+
         if (isTyping) {
           setSearch("");
         } else {
-          document.querySelector<HTMLInputElement>(
-            'input[placeholder="Search notes..."]',
-          )?.focus();
+          document
+            .querySelector<HTMLInputElement>(
+              'input[placeholder="Search notes..."]',
+            )
+            ?.focus();
         }
       }
 
@@ -273,7 +311,7 @@ export default function NotesPage() {
             hasNote={Boolean(selectedNote)}
             soundEnabled={soundEnabled}
             onSave={() => void saveNote()}
-            onToggleSound={() => setSoundEnabled((enabled) => !enabled)}
+            onToggleSound={() => void toggleSound()}
             onShare={() => void shareNote()}
           />
 
@@ -293,7 +331,10 @@ export default function NotesPage() {
           />
 
           <footer className="mt-4 pb-4 text-center text-xs text-white/80 drop-shadow">
-            Press <kbd className="rounded border border-white/20 bg-black/30 px-1.5 py-0.5 text-[10px]">Esc</kbd>{" "}
+            Press{" "}
+            <kbd className="rounded border border-white/20 bg-black/30 px-1.5 py-0.5 text-[10px]">
+              Esc
+            </kbd>{" "}
             to collapse the sidebar · Reverie is your quiet space
           </footer>
         </section>

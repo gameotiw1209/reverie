@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -29,7 +28,7 @@ export default function NotebookEditor({
   onTextChange,
   error,
 }: Props) {
-  const titleRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!note) titleRef.current?.focus();
@@ -53,9 +52,9 @@ export default function NotebookEditor({
         </div>
       </div>
 
-      <div className="relative flex min-w-0 flex-1 flex-col px-4 pt-7 pb-12 sm:px-8">
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <span className="font-newsreader text-xs tracking-wide text-slate-400 italic">
+      <div className="relative flex min-w-0 flex-1 flex-col px-0 pt-7 pb-12">
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+          <span className="font-newsreader text-sm tracking-wide text-slate-400 italic">
             {note ? "A page from your journal" : "A new beginning"}
           </span>
 
@@ -69,24 +68,23 @@ export default function NotebookEditor({
           </div>
         </div>
 
-        <input
+        <textarea
           ref={titleRef}
+          rows={3}
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="A title for this moment..."
           aria-label="Note title"
-          className="mb-2 w-full border-0 bg-transparent font-instrument text-3xl leading-[45px] tracking-tight text-[#1E1C18] outline-none placeholder:text-stone-400 sm:text-4xl"
+         className="mb-0 h-[100px] min-h-0 w-full resize-none overflow-hidden border-0 bg-transparent !font-instrument !text-[24px] !font-normal !leading-[1.15] tracking-tight text-[#1E1C18] outline-none placeholder:text-stone-369 sm:!text-[59px] sm:!leading-[1.1]"
         />
-
         <textarea
           value={text}
           onChange={(event) => onTextChange(event.target.value)}
           placeholder="Let your thoughts find their way onto the page..."
           aria-label="Note content"
           spellCheck
-          className="min-h-[650px] w-full flex-1 resize-y border-0 bg-transparent font-newsreader text-[18px] leading-[36px] tracking-normal text-[#282521] outline-none placeholder:text-stone-400 sm:text-[19px]"
+          className="min-h-[610px] w-full flex-1 resize-y border-0 bg-transparent !font-newsreader !text-[12px] !leading-[1.8] tracking-normal text-[#282521] outline-none placeholder:text-stone-400 sm:!text-[21px] sm:!leading-[1.8]"
         />
-
         {error && (
           <p
             role="alert"
