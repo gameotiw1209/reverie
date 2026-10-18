@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/lib/api";
 import CloudSky from "@/src/components/notes/cloudBackground";
-import NotesSidebar, {type Note,type NoteUser,} from "@/src/components/notes/notesSidebar";
+import NotesSidebar, { type Note, type NoteUser } from "@/src/components/notes/notesSidebar";
 import NotebookEditor from "@/src/components/notes/noteBookeditor";
 import NotesToolbar from "@/src/components/notes/notesToolbar";
 
@@ -19,7 +19,7 @@ export default function NotesPage() {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -53,22 +53,13 @@ export default function NotesPage() {
       const data = await apiRequest<Note[]>("/notes");
       setNotes(data);
 
-      if (data.length > 0) {
-        setSelectedId(data[0].id);
-        setTitle(data[0].title);
-        setText(data[0].text);
-      } else {
-        setSelectedId(null);
-        setTitle("");
-        setText("");
-      }
-
+      setSelectedId(null);
+      setTitle("");
+      setText("");
       setDirty(false);
     } catch (err) {
       console.error("Notes page authentication/loading error:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to load notes.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to load notes.");
     } finally {
       setLoading(false);
     }
@@ -252,9 +243,7 @@ export default function NotesPage() {
           setSearch("");
         } else {
           document
-            .querySelector<HTMLInputElement>(
-              'input[placeholder="Search notes..."]',
-            )
+            .querySelector<HTMLInputElement>('input[placeholder="Search notes..."]')
             ?.focus();
         }
       }
@@ -270,75 +259,77 @@ export default function NotesPage() {
   }, [saveNote]);
 
   if (loading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#15171C] text-white">
-        <p className="font-newsreader text-2xl italic">
-          Opening your sanctuary...
-        </p>
-      </main>
-    );
-  }
-
-  if (!user) return null;
-
   return (
-    <main className="relative h-dvh min-h-[600px] overflow-hidden bg-sky-200 text-slate-800">
-      <div className="pointer-events-none fixed inset-0 z-0 select-none">
-        <CloudSky />
-        <div className="absolute inset-0 bg-blue-900/5 mix-blend-multiply" />
-      </div>
-
-      <div className="relative z-10 flex h-full w-full">
-        <NotesSidebar
-          user={user}
-          notes={filteredNotes}
-          selectedId={selectedId}
-          sidebarOpen={sidebarOpen}
-          search={search}
-          onSearchChange={setSearch}
-          onToggle={() => setSidebarOpen((open) => !open)}
-          onNewNote={newNote}
-          onSelectNote={selectNote}
-          onDeleteNote={(note) => void deleteNote(note)}
-          onLogout={() => void logout()}
-          onAskAI={() => setError("AI chat will be connected in a later step.")}
-        />
-
-        <section className="flex min-w-0 flex-1 flex-col items-center overflow-y-auto px-3 py-6 sm:px-6 sm:py-8">
-          <NotesToolbar
-            dirty={dirty}
-            saving={saving}
-            hasNote={Boolean(selectedNote)}
-            soundEnabled={soundEnabled}
-            onSave={() => void saveNote()}
-            onToggleSound={() => void toggleSound()}
-            onShare={() => void shareNote()}
-          />
-
-          <NotebookEditor
-            note={selectedNote}
-            title={title}
-            text={text}
-            onTitleChange={(value) => {
-              setTitle(value);
-              setDirty(true);
-            }}
-            onTextChange={(value) => {
-              setText(value);
-              setDirty(true);
-            }}
-            error={error}
-          />
-
-          <footer className="mt-4 pb-4 text-center text-xs text-white/80 drop-shadow">
-            Press{" "}
-            <kbd className="rounded border border-white/20 bg-black/30 px-1.5 py-0.5 text-[10px]">
-              Esc
-            </kbd>{" "}
-            to collapse the sidebar · Reverie is your quiet space
-          </footer>
-        </section>
-      </div>
+    <main className="flex min-h-dvh items-center justify-center bg-[#15171C] text-white">
+      <p className="font-newsreader text-2xl italic">
+        Opening your sanctuary...
+      </p>
     </main>
   );
+}
+
+if (!user) return null;
+
+return (
+  <main className="relative min-h-dvh w-full overflow-x-clip bg-sky-200 text-slate-800">
+    <div className="pointer-events-none fixed inset-0 z-0 select-none">
+      <CloudSky />
+      <div className="absolute inset-0 bg-blue-900/5 mix-blend-multiply" />
+    </div>
+
+    <NotesSidebar
+      user={user}
+      notes={filteredNotes}
+      selectedId={selectedId}
+      sidebarOpen={sidebarOpen}
+      search={search}
+      onSearchChange={setSearch}
+      onToggle={() => setSidebarOpen((open) => !open)}
+      onNewNote={newNote}
+      onSelectNote={selectNote}
+      onDeleteNote={(note) => void deleteNote(note)}
+      onLogout={() => void logout()}
+      onAskAI={() => setError("AI chat will be connected in a later step.")}
+    />
+
+    <section
+      className={`relative z-10 flex min-h-dvh flex-col items-center px-3 py-6 transition-[margin-left] duration-200 sm:px-6 sm:py-8 ${
+        sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
+      }`}
+    >
+      <NotesToolbar
+        dirty={dirty}
+        saving={saving}
+        hasNote={Boolean(selectedNote)}
+        soundEnabled={soundEnabled}
+        onSave={() => void saveNote()}
+        onToggleSound={() => void toggleSound()}
+        onShare={() => void shareNote()}
+      />
+
+      <NotebookEditor
+        note={selectedNote}
+        title={title}
+        text={text}
+        onTitleChange={(value) => {
+          setTitle(value);
+          setDirty(true);
+        }}
+        onTextChange={(value) => {
+          setText(value);
+          setDirty(true);
+        }}
+        error={error}
+      />
+
+      <footer className="mt-4 w-full shrink-0 pb-4 text-center text-xs text-white/80 drop-shadow">
+        Press{" "}
+        <kbd className="rounded border border-white/20 bg-black/30 px-1.5 py-0.5 text-[10px]">
+          Esc
+        </kbd>{" "}
+        to collapse the sidebar · Reverie is your quiet space
+      </footer>
+    </section>
+  </main>
+);
 }

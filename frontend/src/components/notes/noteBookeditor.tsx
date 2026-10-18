@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { Note } from "./notesSidebar";
 
 type Props = {
@@ -29,27 +29,40 @@ export default function NotebookEditor({
   error,
 }: Props) {
   const titleRef = useRef<HTMLTextAreaElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!note) titleRef.current?.focus();
   }, [note?.id]);
 
-  return (
-    <article className="paper-texture ruled-paper relative flex min-h-[920px] w-full max-w-[730px] flex-row overflow-hidden rounded-l-md rounded-r-2xl border border-[#e4d7be]">
-      <div className="spiral-spine-shadow relative flex w-10 shrink-0 flex-col items-center justify-start py-8 select-none sm:w-14">
-        <div className="absolute right-0 top-0 bottom-0 w-px border-r border-dashed border-slate-300/60" />
+  useLayoutEffect(() => {
+    const textarea = textRef.current;
+    if (!textarea) return;
 
-        <div className="flex w-full flex-col items-center gap-5">
-          {Array.from({ length: 28 }, (_, index) => (
-            <div
-              key={index}
-              className="relative flex h-4 w-8 items-center justify-between"
-            >
-              <div className="hole-punch h-2.5 w-2.5 rounded-full bg-slate-400" />
-              <div className="absolute right-0 left-1.5 h-2 -rotate-6 transform rounded-full bg-gradient-to-r from-slate-300 via-white to-slate-400 shadow-[0_1px_2px_rgba(0,0,0,0.35)]" />
-            </div>
-          ))}
-        </div>
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [text]);
+
+  useLayoutEffect(() => {
+    const textarea = titleRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [title]);
+
+  return (
+    <article className="paper-texture ruled-paper relative flex w-full max-w-[730px] flex-1 flex-row overflow-hidden rounded-l-md rounded-r-2xl border border-[#e4d7be]">
+      <div
+        className="spiral-spine-shadow relative w-10 shrink-0 select-none sm:w-14"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 50% 12px, #94a3b8 0 5px, transparent 6px), radial-gradient(circle at 50% 20px, #f8fafc 0 2px, transparent 3px)",
+          backgroundSize: "100% 34px, 100% 34px",
+          backgroundRepeat: "repeat-y, repeat-y",
+        }}
+      >
+        <div className="absolute inset-y-0 right-0 w-px border-r border-dashed border-slate-300/60" />
       </div>
 
       <div className="relative flex min-w-0 flex-1 flex-col px-0 pt-7 pb-12">
@@ -58,7 +71,7 @@ export default function NotebookEditor({
             {note ? "A page from your journal" : "A new beginning"}
           </span>
 
-          <div className="flex items-center gap-2 font-instrument text-slate-600">
+          <div className="flex items-center gap-2 font-instrument text-slate-300">
             <span className="text-sm text-stone-600">
               {formatDate(note?.createdAt ?? new Date().toISOString())}
             </span>
@@ -70,21 +83,24 @@ export default function NotebookEditor({
 
         <textarea
           ref={titleRef}
-          rows={3}
+          rows={1}
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="A title for this moment..."
           aria-label="Note title"
-         className="mb-0 h-[100px] min-h-0 w-full resize-none overflow-hidden border-0 bg-transparent !font-instrument !text-[24px] !font-normal !leading-[1.15] tracking-tight text-[#1E1C18] outline-none placeholder:text-stone-369 sm:!text-[59px] sm:!leading-[1.1]"
+          className="mb-1 min-h-[100px] w-full resize-none overflow-hidden border-0 bg-transparent !font-instrument !text-[24px] !font-normal !leading-[1.15] tracking-tight text-[#1E1C18] outline-none placeholder:text-stone-400 sm:!text-[62px] sm:!leading-[1.1]"
         />
+
         <textarea
+          ref={textRef}
           value={text}
           onChange={(event) => onTextChange(event.target.value)}
           placeholder="Let your thoughts find their way onto the page..."
           aria-label="Note content"
           spellCheck
-          className="min-h-[610px] w-full flex-1 resize-y border-0 bg-transparent !font-newsreader !text-[12px] !leading-[1.8] tracking-normal text-[#282521] outline-none placeholder:text-stone-400 sm:!text-[21px] sm:!leading-[1.8]"
+          className="mt-0 min-h-[60px] w-full resize-none overflow-hidden border-0 bg-transparent !font-newsreader !text-[17px] !leading-[1.8] tracking-normal text-[#282521] outline-none placeholder:text-stone-400 sm:!text-[20px] sm:!leading-[1.8]"
         />
+
         {error && (
           <p
             role="alert"
@@ -94,12 +110,10 @@ export default function NotebookEditor({
           </p>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-stone-300/50 pt-3 text-[11px] text-stone-500">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-stone-300/50 pt-3 text-[11px] text-stone-500">
           <span>{text.length} characters</span>
           <span>
-            {note
-              ? `Updated ${formatDate(note.updatedAt)}`
-              : "This page hasn't been saved yet"}
+            {note ? `Updated ${formatDate(note.updatedAt)}` : "This page hasn't been saved yet"}
           </span>
         </div>
       </div>

@@ -75,7 +75,7 @@ export default function NotesSidebar({
   }
 
   return (
-    <aside className="relative z-30 flex h-full w-[290px] shrink-0 flex-col justify-between overflow-hidden border-r border-white/10 bg-[#15171C]/60 text-white/90 shadow-2xl backdrop-blur-xl backdrop-saturate-150 max-md:fixed max-md:inset-y-3 max-md:left-3 max-md:h-[calc(100dvh-1.5rem)] max-md:rounded-2xl">
+    <aside className="fixed inset-y-3 left-3 z-30 flex h-[calc(100dvh-1.5rem)] w-[290px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#15171C]/60 text-white/90 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4">
         <div className="flex items-center justify-between px-2 pt-1">
           <span className="flex items-center gap-2 font-instrument text-2xl italic tracking-wide text-white">
@@ -168,9 +168,7 @@ export default function NotesSidebar({
                 </button>
 
                 <button
-                  onClick={() =>
-                    setMenuId(menuId === note.id ? null : note.id)
-                  }
+                  onClick={() => setMenuId(menuId === note.id ? null : note.id)}
                   aria-label={`Actions for ${note.title || "note"}`}
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-white/40 opacity-0 transition hover:bg-white/10 hover:text-white group-hover:opacity-100 focus:opacity-100"
                 >
