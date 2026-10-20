@@ -20,6 +20,59 @@ function formatDate(date: string) {
   });
 }
 
+function useAutosize(
+  ref: React.RefObject<HTMLTextAreaElement | null>,
+  value: string,
+) {
+  const mirrorRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useLayoutEffect(() => {
+    const textarea = ref.current;
+    if (!textarea) return;
+
+    if (!mirrorRef.current) {
+      const mirror = document.createElement("textarea");
+      mirror.setAttribute("tabindex", "-1");
+      mirror.setAttribute("aria-hidden", "true");
+      mirror.style.position = "absolute";
+      mirror.style.top = "0";
+      mirror.style.left = "-9999px";
+      mirror.style.visibility = "hidden";
+      mirror.style.pointerEvents = "none";
+      mirror.style.height = "0";
+      document.body.appendChild(mirror);
+      mirrorRef.current = mirror;
+    }
+
+    const mirror = mirrorRef.current;
+    const computed = window.getComputedStyle(textarea);
+
+    mirror.style.width = `${textarea.clientWidth}px`;
+    mirror.style.font = computed.font;
+    mirror.style.letterSpacing = computed.letterSpacing;
+    mirror.style.lineHeight = computed.lineHeight;
+    mirror.style.padding = computed.padding;
+    mirror.style.border = computed.border;
+    mirror.style.boxSizing = computed.boxSizing;
+    mirror.style.whiteSpace = "pre-wrap";
+    mirror.style.wordBreak = "break-word";
+    mirror.value = value || " ";
+
+    const nextHeight = mirror.scrollHeight;
+
+    if (textarea.style.height !== `${nextHeight}px`) {
+      textarea.style.height = `${nextHeight}px`;
+    }
+  }, [value, ref]);
+
+  useEffect(() => {
+    return () => {
+      mirrorRef.current?.remove();
+      mirrorRef.current = null;
+    };
+  }, []);
+}
+
 export default function NotebookEditor({
   note,
   title,
@@ -35,21 +88,8 @@ export default function NotebookEditor({
     if (!note) titleRef.current?.focus();
   }, [note?.id]);
 
-  useLayoutEffect(() => {
-    const textarea = textRef.current;
-    if (!textarea) return;
-
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [text]);
-
-  useLayoutEffect(() => {
-    const textarea = titleRef.current;
-    if (!textarea) return;
-
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [title]);
+  useAutosize(titleRef, title);
+  useAutosize(textRef, text);
 
   return (
     <article className="paper-texture ruled-paper relative flex w-full max-w-[730px] flex-1 flex-row overflow-hidden rounded-l-md rounded-r-2xl border border-[#e4d7be]">
@@ -88,7 +128,7 @@ export default function NotebookEditor({
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="A title for this moment..."
           aria-label="Note title"
-          className="mb-1 min-h-[100px] w-full resize-none overflow-hidden border-0 bg-transparent !font-instrument !text-[24px] !font-normal !leading-[1.15] tracking-tight text-[#1E1C18] outline-none placeholder:text-stone-400 sm:!text-[62px] sm:!leading-[1.1]"
+          className="mb-1 w-full resize-none overflow-hidden border-0 bg-transparent !font-instrument !text-[24px] !font-normal !leading-[1.15] tracking-tight text-[#1E1C18] outline-none placeholder:text-stone-400 sm:!text-[62px] sm:!leading-[1.1]"
         />
 
         <textarea
@@ -98,7 +138,7 @@ export default function NotebookEditor({
           placeholder="Let your thoughts find their way onto the page..."
           aria-label="Note content"
           spellCheck
-          className="mt-0 min-h-[60px] w-full resize-none overflow-hidden border-0 bg-transparent !font-newsreader !text-[17px] !leading-[1.8] tracking-normal text-[#282521] outline-none placeholder:text-stone-400 sm:!text-[20px] sm:!leading-[1.8]"
+          className="mt-3  w-full resize-none overflow-hidden border-0 bg-transparent !font-newsreader !text-[17px] !leading-[1.8] tracking-normal text-[#282521] outline-none placeholder:text-stone-400 sm:!text-[20px] sm:!leading-[1.8]"
         />
 
         {error && (
@@ -113,7 +153,9 @@ export default function NotebookEditor({
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-stone-300/50 pt-3 text-[11px] text-stone-500">
           <span>{text.length} characters</span>
           <span>
-            {note ? `Updated ${formatDate(note.updatedAt)}` : "This page hasn't been saved yet"}
+            {note
+              ? `Updated ${formatDate(note.updatedAt)}`
+              : "This page hasn't been saved yet"}
           </span>
         </div>
       </div>
