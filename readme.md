@@ -36,4 +36,4 @@ The backend will run at `http://localhost:5000`.
 
 **Backend:** https://reverie-ucpr.onrender.com
 
-*The frontend is deployed separately on Vercel.*
+*frontend is almost done just LEFT with AI chat Designing it*
