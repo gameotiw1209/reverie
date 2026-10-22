@@ -8,11 +8,31 @@ import HeroSection from "../src/components/landing/herosection";
 import SiteFooter from "../src/components/landing/footer";
 import SignInForm from "../src/components/auth/signinForm";
 import SignUpForm from "../src/components/auth/signupForm";
+import { useRouter } from "next/navigation";
+import { apiRequest } from "../lib/api";
 
 type AuthView = "signin" | "signup" | null;
 
 export default function Home() {
   const [authView, setAuthView] = useState<AuthView>(null);
+  const router = useRouter();
+
+  const handleGetStarted = async () => {
+    try {
+      await apiRequest("/auth/me");
+      router.push("/home/notes");
+    } catch {
+      setAuthView("signin");
+    }
+  };
+  //will look in this if needed to bring it on teh actual hoem url or not 
+  // useEffect(() => {
+  //   apiRequest("/auth/me")
+  //   .then(() => {
+  //     router.replace("/home/notes");
+  //   })
+  //   .catch(() => {});
+  // }, [router]);
 
   useEffect(() => {
     if (!authView) return;
@@ -70,7 +90,7 @@ export default function Home() {
         />
 
         <div className="relative z-10 flex min-h-dvh flex-col">
-          <Navbar onGetStarted={() => setAuthView("signin")} />
+          <Navbar onGetStarted={handleGetStarted} />
           <main className="flex flex-1 items-center">
             <HeroSection />
           </main>
