@@ -17,7 +17,7 @@ export default function ChatMessages({ messages, sending }: Props) {
   }, [messages, sending]);
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6 sm:py-7">
+    <div className=" hide-scrollbar min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6 sm:py-7">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <div className="mb-2 flex items-center justify-between text-[11px] text-white/45">
           <span>✦ &nbsp; Your conversation</span>
@@ -31,7 +31,7 @@ export default function ChatMessages({ messages, sending }: Props) {
         {sending && (
           <div className="flex justify-start">
             <div className="rounded-2xl rounded-bl-md border border-white/10 bg-[#171B23]/45 px-5 py-3 text-sm text-white/60">
-              Reverie is thinking...
+              Marx is thinking...
             </div>
           </div>
         )}

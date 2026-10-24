@@ -301,10 +301,10 @@ export default function ChatPage() {
       />
 
       <section
-        className={`relative z-10 flex min-h-dvh flex-col px-3 pb-4 pt-20 transition-[margin-left] duration-200 sm:px-6 sm:pt-6 ${
-          sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
+      className={`relative z-10 flex h-dvh min-h-0 flex-col overflow-hidden px-3 pb-3 pt-20 transition-[margin-left] duration-200 sm:px-6 sm:pt-6 ${
+        sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
         }`}
-      >
+        >
         <div className="absolute right-4 top-4 z-20 sm:right-6">
           <button
             type="button"

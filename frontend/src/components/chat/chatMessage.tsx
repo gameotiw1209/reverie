@@ -16,15 +16,15 @@ export default function ChatMessage({ message }: Props) {
       }`}
     >
       <article
-        className={`max-w-[92%] whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-7 shadow-sm sm:max-w-[80%] sm:px-5 ${
+        className={`max-w-[50%] whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm sm:max-w-[80%] sm:px-5 ${
           isUser
-            ? "rounded-br-md border border-amber-200/15 bg-amber-100/15 text-white"
-            : "rounded-bl-md border border-white/10 bg-[#171B23]/45 text-white/90"
+            ? "rounded-br-md border border-amber-300/55 bg-amber-600/45 text-white"
+            : "rounded-bl-md border border-white/10 bg-[#171B29]/45 text-white/90"
         }`}
       >
         {!isUser && (
           <p className="mb-1.5 text-[15px] font-instrument  text-amber-300">
-            Reverie
+            Marx
           </p>
         )}
 

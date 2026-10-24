@@ -60,7 +60,7 @@ export default function ChatComposer({
          disabled={!selectedNote || sending}
          className="min-h-[44px] max-h-32 w-full resize-none overflow-y-auto bg-transparent px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-white/35 disabled:cursor-not-allowed disabled:opacity-60 sm:px-5"
          />
-         
+
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 px-3 py-3 sm:px-4">
             <div className="relative">
               <button
@@ -127,8 +127,8 @@ export default function ChatComposer({
           </div>
         </div>
 
-        <p className="mt-2 text-center text-[10px] leading-5 text-white/45">
-          Enter to send · Shift + Enter for a new line · Your conversations are private to your account
+        <p className="mt-2 text-center text-[10px] leading-5 text-#191D26">
+          AI can make mistakes · Your conversations are private to your account
         </p>
       </div>
     // </div>
