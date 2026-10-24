@@ -136,6 +136,15 @@ chatRouter.get("/notes/:id/chat",authenticateToken,async(req:Request,res:Respons
             res.status(400).json({msg:"Invalid note ID"});
             return;
         }
+        const note=await prisma.notes.findFirst({
+            where:{
+                id:noteId,
+                userID:userid,
+            },
+            select: {
+          id: true,
+        },
+      });
         const chat=await prisma.chatMessage.findMany({
             where:{
                 userId:userid,

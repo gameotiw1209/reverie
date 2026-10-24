@@ -31,3 +31,46 @@ export async function apiRequest<T>(
 
   return data as T;
 }
+export type ChatMessage = {
+  id: string;
+  noteId: string;
+  userId: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ChatHistoryResponse = {
+  chat: ChatMessage[];
+};
+
+export type ChatReplyResponse = {
+  msg: string;
+  reply: string;
+};
+
+export async function getChatHistory(noteId: string) {
+  return apiRequest<ChatHistoryResponse>(
+    `/notes/${encodeURIComponent(noteId)}/chat`,
+  );
+}
+
+export async function sendChatMessage(noteId: string, message: string) {
+  return apiRequest<ChatReplyResponse>(
+    `/notes/${encodeURIComponent(noteId)}/chat`,
+    {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    },
+  );
+}
+
+export async function clearChatHistory(noteId: string) {
+  return apiRequest<{ msg: string }>(
+    `/notes/${encodeURIComponent(noteId)}/chat`,
+    {
+      method: "DELETE",
+    },
+  );
+}

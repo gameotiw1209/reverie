@@ -289,9 +289,13 @@ return (
       onSelectNote={selectNote}
       onDeleteNote={(note) => void deleteNote(note)}
       onLogout={() => void logout()}
-      onAskAI={() => setError("AI chat will be connected in a later step.")}
+      onAskAI={() => {
+        const destination = selectedId
+        ? `/home/notes/chat?noteId=${encodeURIComponent(selectedId)}`
+        : "/home/notes/chat";
+        router.push(destination);
+      }}
     />
-
     <section
       className={`relative z-10 flex min-h-dvh flex-col items-center px-3 py-6 transition-[margin-left] duration-200 sm:px-6 sm:py-8 ${
         sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
