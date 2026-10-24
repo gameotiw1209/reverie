@@ -33,7 +33,7 @@ export default function ChatHeader({ note, onClear, clearing }: Props) {
         type="button"
         onClick={onClear}
         disabled={clearing}
-        className="flex shrink-0 items-center gap-2 rounded-lg border border-rose-300/15 px-2.5 py-2 text-xs text-rose-200/80 transition hover:bg-rose-400/10 disabled:opacity-50 sm:px-3"
+        className="flex shrink-0 items-center gap-2 rounded-lg border border-rose-300/15 px-2.5 py-2 text-xs text-red-300/90 transition hover:bg-red-400/15 disabled:opacity-50 sm:px-3"
       >
         <Trash2 size={14} />
         <span className="hidden sm:inline">

@@ -154,7 +154,8 @@ authRouter.post("/auth/logout", (req: Request, res: Response) => {
     res.clearCookie("token", {
         httpOnly: true,
         sameSite: "lax",
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production",
+        path:"/",
     });
 
     res.status(200).json({

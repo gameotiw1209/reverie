@@ -194,13 +194,27 @@ export default function NotesPage() {
   const logout = useCallback(async () => {
     try {
       await apiRequest<{ msg: string }>("/auth/logout", {
-        method: "POST",
-      });
-    } finally {
-      router.replace("/");
-      router.refresh();
-    }
-  }, [router]);
+      method: "POST",
+    });
+
+    setUser(null);
+    setNotes([]);
+    setSelectedId(null);
+    setTitle("");
+    setText("");
+    setDirty(false);
+
+    router.replace("/");
+    router.refresh();
+  } catch (err) {
+    console.error("Logout failed:", err);
+    setError(
+      err instanceof Error
+        ? `Unable to log out: ${err.message}`
+        : "Unable to log out. Please try again.",
+    );
+  }
+}, [router]);
 
   const shareNote = useCallback(async () => {
     if (!selectedNote) return;
@@ -290,10 +304,13 @@ return (
       onDeleteNote={(note) => void deleteNote(note)}
       onLogout={() => void logout()}
       onAskAI={() => {
-        const destination = selectedId
-        ? `/home/notes/chat?noteId=${encodeURIComponent(selectedId)}`
-        : "/home/notes/chat";
-        router.push(destination);
+        if (selectedId) {
+          router.push(
+            `/home/notes/chat?noteId=${encodeURIComponent(selectedId)}`
+          );
+        } else {
+          router.push("/home/notes/chat");
+        }
       }}
     />
     <section
