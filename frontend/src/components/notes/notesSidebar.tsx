@@ -64,10 +64,10 @@ export default function NotesSidebar({
         <button
           onClick={onToggle}
           title="Open sidebar"
-          className="flex items-center gap-2 rounded-xl border border-white/15 bg-[#15171C]/80 px-3 py-2.5 text-white shadow-xl backdrop-blur-xl transition hover:bg-[#22252d]"
+          className="flex items-center gap-2 rounded-xl border border-white/15 bg-clear px-3 py-2.5 text-white shadow-xl backdrop-blur-xl transition hover:bg-clear/90 hover:text-amber-300"
         >
           <PanelLeft size={17} />
-          <span className="font-instrument text-lg italic">Reverie</span>
+          {/* <span className="font-instrument text-lg italic">Reverie</span> */}
           <span className="h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#fcd34d]" />
         </button>
       </div>
@@ -75,7 +75,7 @@ export default function NotesSidebar({
   }
 
   return (
-    <aside className="fixed inset-y-3 left-3 z-30 flex h-[calc(100dvh-1.5rem)] w-[290px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#15171C]/60 text-white/90 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
+    <aside className="fixed inset-y-3 left-3 z-30 flex h-[calc(100dvh-1.5rem)] w-[290px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#15171C]/28 text-white/90 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4">
         <div className="flex items-center justify-between px-2 pt-1">
           <span className="flex items-center gap-2 font-instrument text-2xl italic tracking-wide text-white">
@@ -100,13 +100,13 @@ export default function NotesSidebar({
             <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-400 to-amber-200 text-amber-950 shadow-sm shadow-amber-400/40 transition group-hover:scale-105">
               <Sparkles size={13} />
             </span>
-            <span className="text-sm font-medium tracking-tight text-amber-100">
-              Ask AI Reverie
+            <span className="text-sm font-medium tracking-tight text-amber-300">
+              Ask Marx 
             </span>
           </span>
-          <kbd className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] tracking-wider text-amber-200/60">
+          {/* <kbd className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] tracking-wider text-amber-200/60">
             ⌘K
-          </kbd>
+          </kbd> */}
         </button>
 
         <nav>
@@ -185,7 +185,7 @@ export default function NotesSidebar({
                       className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs text-rose-400 transition hover:bg-rose-500/15"
                     >
                       <Trash2 size={14} />
-                      Delete entry
+                      Delete Note
                     </button>
                   </div>
                 )}
