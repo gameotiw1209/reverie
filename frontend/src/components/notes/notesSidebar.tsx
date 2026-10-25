@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft,ChevronRight,House,Search,Plus,Sparkles,MoreHorizontal,Trash2,LogOut,PanelLeft,X,} from "lucide-react";
+import { User,House,Search,Plus,Sparkles,MoreHorizontal,Trash2,LogOut,PanelLeft,X,} from "lucide-react";
 
 export type Note = {
   id: string;
@@ -204,9 +204,9 @@ export default function NotesSidebar({
       <div className="border-t border-white/10 p-3">
         <div className="flex items-center justify-between gap-2 rounded-xl p-2 transition hover:bg-white/5">
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-amber-500 font-instrument text-sm font-bold text-slate-900 shadow-inner">
-              {user.name.trim().charAt(0).toUpperCase() || "R"}
-            </div>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-amber-500 text-slate-900 shadow-inner">
+              <User className="h-4 w-4" />
+              </div>
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-xs font-medium text-white/90">
                 {user.name}

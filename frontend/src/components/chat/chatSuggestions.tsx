@@ -1,12 +1,12 @@
 "use client";
 
-import { Lightbulb, Leaf, Rocket, Sparkles } from "lucide-react";
+import { Lightbulb, TreePalm , Rocket, Sparkles } from "lucide-react";
 
 const suggestions = [
   {
     title: "Reflect on recurring themes across my notes",
     description: "Look for patterns in the note you selected.",
-    icon: Leaf,
+    icon: TreePalm,
     prompt: "What recurring themes or patterns do you notice in this note?",
   },
   {

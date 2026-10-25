@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, ChevronDown, FileText, LoaderCircle } from "lucide-react";
+import { ArrowUp, ChevronDown, NotebookText, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Note } from "@/src/components/notes/notesSidebar";
 
@@ -68,7 +68,7 @@ export default function ChatComposer({
                 onClick={() => setSelectorOpen((open) => !open)}
                 className="flex max-w-[220px] items-center gap-2 rounded-full border border-amber-300/15 bg-amber-300/[0.08] px-3 py-2 text-xs text-amber-100 transition hover:bg-amber-300/[0.14]"
               >
-                <FileText size={13} className="shrink-0 text-amber-300" />
+                <NotebookText size={13} className="shrink-0 text-amber-300" />
 
                 <span className="truncate">
                   {selectedNote?.title || "Select a note"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2,NotebookText } from "lucide-react";
 import type { Note } from "@/src/components/notes/notesSidebar";
 
 type Props = {
@@ -14,7 +14,7 @@ export default function ChatHeader({ note, onClear, clearing }: Props) {
     <header className="flex min-w-0 items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5">
-          <span className="text-sm text-amber-300">▤</span>
+          <NotebookText className="text-sm text-amber-300"></NotebookText>
         </div>
 
         <div className="min-w-0">
@@ -26,7 +26,7 @@ export default function ChatHeader({ note, onClear, clearing }: Props) {
           </p>
         </div>
 
-        <ChevronDown size={15} className="shrink-0 text-white/40" />
+        {/* <ChevronDown size={15} className="shrink-0 text-white/40" /> */}
       </div>
 
       <button

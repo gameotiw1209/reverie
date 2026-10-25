@@ -39,7 +39,7 @@ export default function ChatConversation({
 
       {loadingHistory ? (
         <div className="flex flex-1 items-center justify-center text-sm text-white/60">
-          Loading your conversation...
+          Why Reverie ?...
         </div>
       ) : messages.length === 0 ? (
         <div className="flex flex-1 items-center justify-center px-6 text-center">

@@ -105,7 +105,7 @@ authRouter.post('/auth/login', loginLimiter , async(req:Request,res:Response)=>{
         }
         const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '365d' });
         
-        res.cookie("token",token,{httpOnly: true, sameSite: "none", secure: true ,maxAge :365 * 24 * 60 * 60 * 1000});
+        res.cookie("token",token,{httpOnly: true, sameSite: "none", secure: true, path:"/", maxAge :365 * 24 * 60 * 60 * 1000});
 
         res.status(200).json({msg:"Login successful",user:{id:user.id,email:user.email,name:user.name}});
         return;
@@ -153,7 +153,7 @@ authRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response
 authRouter.post("/auth/logout", (req: Request, res: Response) => {
     res.clearCookie("token", {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production",
         path:"/",
     });

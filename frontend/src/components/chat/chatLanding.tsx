@@ -63,7 +63,7 @@ export default function ChatLanding({
           sending={sending}
           placeholder={
             selectedNote
-              ? "Ask Reverie anything about your note..."
+              ? "Ask Marx anything about your note..."
               : "Select a note to begin..."
           }
           initialMessage=""
