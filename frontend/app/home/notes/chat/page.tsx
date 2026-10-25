@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Volume2, VolumeX } from "lucide-react";
-import { apiRequest, clearChatHistory, getChatHistory, sendChatMessage } from "@/lib/api";
+import {
+  apiRequest,
+  clearChatHistory,
+  getChatHistory,
+  sendChatMessage,
+} from "@/lib/api";
 import type { ChatMessage } from "@/lib/api";
 import CloudSky from "@/src/components/notes/cloudBackground";
 import NotesSidebar, {
@@ -73,7 +78,9 @@ export default function ChatPage() {
         return;
       }
 
-      router.replace(`/home/notes/chat?noteId=${encodeURIComponent(note.id)}`);
+      router.replace(
+        `/home/notes/chat?noteId=${encodeURIComponent(note.id)}`,
+      );
       await loadHistory(note.id);
     },
     [loadHistory, router],
@@ -97,7 +104,9 @@ export default function ChatPage() {
         setUser(user);
         setNotes(fetchedNotes);
 
-        const noteId = new URLSearchParams(window.location.search).get("noteId");
+        const noteId = new URLSearchParams(
+          window.location.search,
+        ).get("noteId");
 
         if (noteId) {
           const note = fetchedNotes.find((item) => item.id === noteId);
@@ -172,47 +181,47 @@ export default function ChatPage() {
   }, [soundEnabled]);
 
   const sendMessage = useCallback(
-  async (message: string) => {
-    if (!selectedNote || sending || !message.trim()) return;
+    async (message: string) => {
+      if (!selectedNote || sending || !message.trim()) return;
 
-    const noteId = selectedNote.id;
-    const content = message.trim();
-    const timestamp = new Date().toISOString();
+      const noteId = selectedNote.id;
+      const content = message.trim();
+      const timestamp = new Date().toISOString();
 
-    const optimisticMessage: ChatMessage = {
-      id: `temp-${crypto.randomUUID()}`,
-      noteId,
-      userId: user?.id ?? "",
-      role: "user",
-      content,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    };
+      const optimisticMessage: ChatMessage = {
+        id: `temp-${crypto.randomUUID()}`,
+        noteId,
+        userId: user?.id ?? "",
+        role: "user",
+        content,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      };
 
-    setMessages((current) => [...current, optimisticMessage]);
-    setSending(true);
-    setError("");
+      setMessages((current) => [...current, optimisticMessage]);
+      setSending(true);
+      setError("");
 
-    try {
-      await sendChatMessage(noteId, content);
+      try {
+        await sendChatMessage(noteId, content);
 
-      const result = await getChatHistory(noteId);
+        const result = await getChatHistory(noteId);
 
-      if (selectedNote?.id === noteId) {
-        setMessages(result.chat);
+        if (selectedNote?.id === noteId) {
+          setMessages(result.chat);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to send your message. Please try again.",
+        );
+      } finally {
+        setSending(false);
       }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to send your message. Please try again.",
-      );
-    } finally {
-      setSending(false);
-    }
-  },
-  [selectedNote, sending, user],
-);
+    },
+    [selectedNote, sending, user],
+  );
 
   const clearConversation = useCallback(async () => {
     if (!selectedNote || clearing) return;
@@ -280,6 +289,7 @@ export default function ChatPage() {
 
             try {
               await apiRequest(`/notes/${note.id}`, { method: "DELETE" });
+
               setNotes((current) =>
                 current.filter((item) => item.id !== note.id),
               );
@@ -301,10 +311,10 @@ export default function ChatPage() {
       />
 
       <section
-      className={`relative z-10 flex h-dvh min-h-0 flex-col overflow-hidden px-3 pb-3 pt-20 transition-[margin-left] duration-200 sm:px-6 sm:pt-6 ${
-        sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
+        className={`relative z-10 flex h-dvh min-h-0 flex-col overflow-hidden px-3 pb-3 pt-20 transition-[margin-left] duration-200 sm:px-6 sm:pt-6 ${
+          sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
         }`}
-        >
+      >
         <div className="absolute right-4 top-4 z-20 sm:right-6">
           <button
             type="button"
@@ -326,7 +336,7 @@ export default function ChatPage() {
           </div>
         )}
 
-        {selectedNote && messages.length > 0 ? (
+        {selectedNote && (messages.length > 0 || sending) ? (
           <ChatConversation
             notes={notes}
             selectedNote={selectedNote}
@@ -339,7 +349,7 @@ export default function ChatPage() {
             onClear={() => void clearConversation()}
           />
         ) : selectedNote && loadingHistory ? (
-          <div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center rounded-2xl border border-white/10 bg-[#202938]/60 text-sm text-white/70 backdrop-blur-xl">
+          <div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center text-sm text-white/70">
             Loading your conversation...
           </div>
         ) : (
@@ -349,7 +359,7 @@ export default function ChatPage() {
             onSelectNote={(note) => void selectChatNote(note)}
             onSend={sendMessage}
             sending={sending}
-            onPrompt={() => {}}
+            onPrompt={(prompt) => void sendMessage(prompt)}
           />
         )}
       </section>

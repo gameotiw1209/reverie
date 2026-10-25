@@ -1,31 +1,40 @@
 "use client";
 
-import { Lightbulb, TreePalm , Rocket, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  MessageCircleHeart,
+  Smile,
+} from "lucide-react";
 
 const suggestions = [
   {
-    title: "Reflect on recurring themes across my notes",
-    description: "Look for patterns in the note you selected.",
-    icon: TreePalm,
-    prompt: "What recurring themes or patterns do you notice in this note?",
+    title: "What is this note about?",
+    description: "Help me understand the main ideas in my note.",
+    icon: BookOpen,
+    prompt:
+      "Explain what this note is about, summarize its main ideas, and highlight what seems most important.",
   },
   {
-    title: "Help me unpack an unsettled emotion",
-    description: "Explore what you might be feeling.",
-    icon: Lightbulb,
-    prompt: "Help me unpack the emotions expressed in this note.",
+    title: "Help me plan things out",
+    description: "Turn my thoughts into a simple, practical plan.",
+    icon: CalendarDays,
+    prompt:
+      "Based on this note, help me create a realistic and practical plan. Break it into small steps I can follow.",
   },
   {
-    title: "Draft a gentle evening reflection",
-    description: "Reflect on the day with gratitude.",
-    icon: Rocket,
-    prompt: "Help me write a gentle reflection based on this note.",
+    title: "What do you think about my thoughts?",
+    description: "Get a fresh perspective on what you wrote.",
+    icon: MessageCircleHeart,
+    prompt:
+      "What do you think about the thoughts and ideas I've expressed in this note? Give me an honest, thoughtful perspective without judging me.",
   },
   {
-    title: "Find connections in my thoughts",
-    description: "Explore the ideas behind your writing.",
-    icon: Sparkles,
-    prompt: "What connections or insights can you find in this note?",
+    title: "I'm feeling happy today",
+    description: "Explore what's making today feel special.",
+    icon: Smile,
+    prompt:
+      "Based on this note, help me reflect on what might be making me feel happy today and how I can appreciate or carry this feeling forward.",
   },
 ];
 
