@@ -17,7 +17,8 @@ const cookieOptions = {
 };
 //this is a signup post like its easy to get an idea of what is going on like i only messed up with the prisma.user.create earlier
 //as it was some prisma generate error and like yeah the way i did first it with the mongoose only a prisma.user comes in extra and 
-//also like bringing it with some structure way of making it in data property object that was it ig
+//also like bringing it with some structure way of making it in data property object that was it ig 
+//edit: added teh token generation and cookie setting in the signup route so that user can directly get into the website after signing up
 
 authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) => {
     try{
@@ -43,16 +44,19 @@ authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) =
             return;
         }
         if(name.length > 50){
-            res.status(400).json({msg:"name can't be this big sybau"});
+            res.status(400).json({msg:"name must be 50 characters or fewer"});
             return;
         }
-        const passwordHash = await bcrypt.hash(password,12);
+
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) {
             console.error("JWT_SECRET is missing or empty");
             res.status(500).json({ msg: "Authentication is not configured" });
             return;
         }
+
+        const passwordHash = await bcrypt.hash(password,12);
+
         const newUser = await prisma.user.create({
             data:{
                 email:normalizedEmail,
@@ -61,12 +65,12 @@ authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) =
             },
             select:{
                 id:true,
-                email:true
+                email:true,
+                name:true
             },
         });
-        res.status(201).json({msg:"user CREATED SUCCESSFULLY",newUser});
-        const token = createToken(newUser.id, jwtSecret);
 
+        const token = jwt.sign({ userId: newUser.id }, jwtSecret, { expiresIn: '365d' });
         res.cookie("token", token, cookieOptions);
 
         res.status(201).json({
@@ -74,9 +78,7 @@ authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) =
             user: newUser,
         });
         return;
-    
     } catch (error) {
-        // duplicate EMAIL
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&
             error.code === "P2002"
@@ -85,7 +87,7 @@ authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) =
             return;
         }
         console.error("Error creating user: ", error);
-        res.status(500).json({ error: "Error creating user" });
+        res.status(500).json({ msg: "Error creating user" });
         return;
     }
 });
