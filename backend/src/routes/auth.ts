@@ -8,6 +8,13 @@ import { signupLimiter, loginLimiter } from "../middleware/ratelimit";
 
 const authRouter = express.Router();
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const cookieOptions = {
+    httpOnly: true,
+    sameSite: "none" as const,
+    secure: true,
+    path: "/",
+    maxAge: 365 * 24 * 60 * 60 * 1000,
+};
 //this is a signup post like its easy to get an idea of what is going on like i only messed up with the prisma.user.create earlier
 //as it was some prisma generate error and like yeah the way i did first it with the mongoose only a prisma.user comes in extra and 
 //also like bringing it with some structure way of making it in data property object that was it ig
@@ -40,7 +47,12 @@ authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) =
             return;
         }
         const passwordHash = await bcrypt.hash(password,12);
-
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+            console.error("JWT_SECRET is missing or empty");
+            res.status(500).json({ msg: "Authentication is not configured" });
+            return;
+        }
         const newUser = await prisma.user.create({
             data:{
                 email:normalizedEmail,
@@ -53,7 +65,16 @@ authRouter.post('/auth/signup', signupLimiter, async(req:Request,res:Response) =
             },
         });
         res.status(201).json({msg:"user CREATED SUCCESSFULLY",newUser});
+        const token = createToken(newUser.id, jwtSecret);
+
+        res.cookie("token", token, cookieOptions);
+
+        res.status(201).json({
+            msg: "Signup successful",
+            user: newUser,
+        });
         return;
+    
     } catch (error) {
         // duplicate EMAIL
         if (
@@ -165,3 +186,7 @@ authRouter.post("/auth/logout", (req: Request, res: Response) => {
 });
 
 export default authRouter;
+
+function createToken(id: string, jwtSecret: string) {
+    throw new Error("Function not implemented.");
+}

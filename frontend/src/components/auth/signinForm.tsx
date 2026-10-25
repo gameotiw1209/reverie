@@ -67,18 +67,18 @@ export default function SignInForm({ onClose, onSwitchToSignUp }: SignInFormProp
       </button>
 
       <div className="mb-6 flex flex-col items-center text-center">
-        <div className="mb-2.5 font-newsreader text-xl italic tracking-wide text-[#FFF5E1]/90">
+        <div className="mb-2.5 font-instrument text-2xl italic tracking-wide text-[#FFF5E1]/90">
           Reverie
         </div>
 
         <h1
           id="sign-in-heading"
-          className="mb-1.5 font-newsreader text-[26px] font-normal leading-snug tracking-tight text-[#FFF5E1]"
+          className="mb-1.5 font-newsreader text-[23px] font-normal leading-snug tracking-tight text-[#FFF5E1]"
         >
           Sign in to your account
         </h1>
 
-        <p className="font-jakarta text-sm text-[#FFF5E1]/70">
+        <p className="font-jakarta text-[13px] text-[#FFF5E1]/70">
         Welcome back! Pick up where you left off.
         </p>
       </div>

@@ -282,8 +282,8 @@ export default function JournalCard() {
       {showReflection && (
         <div className="mt-4 rounded-2xl border border-white/10 bg-[#131313]/80 p-4 backdrop-blur-md">
           <p
-            className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#FFB781]"
-            style={{ fontFamily: "var(--font-jakarta), sans-serif" }}
+            className="mb-2 text-[10px] uppercase tracking-[0.15em] text-[#FFB781]"
+            style={{ fontFamily: "var(--font-instrument), sans-serif" }}
           >
             A moment to reflect
           </p>
@@ -296,10 +296,10 @@ export default function JournalCard() {
           </p>
 
           <p
-            className="mt-3 text-[10px] text-[#DDC1AF]/70"
-            style={{ fontFamily: "var(--font-jakarta), sans-serif" }}
+            className="mt-3 text-[13px] text-[#DDC1AF]/70"
+            style={{ fontFamily: "var(--font-newsreader), sans-serif" }}
           >
-            Sample reflection · Connect your AI backend to generate personalised responses.
+            Bring your thoughts and get a proper Reflection by Signing In.
           </p>
         </div>
       )}

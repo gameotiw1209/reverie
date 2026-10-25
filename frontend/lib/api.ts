@@ -8,14 +8,22 @@ export async function apiRequest<T>(
     throw new Error("Backend URL is not configured.");
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new Error(
+      "Unable to connect to the server. Please check your internet connection and try again.",
+    );
+  }
 
   const data = await response.json().catch(() => null);
 
@@ -25,12 +33,13 @@ export async function apiRequest<T>(
         ? data.msg
         : typeof data?.message === "string"
           ? data.message
-          : "Unable to sign in. Please try again.",
+          : `Request failed (${response.status}). Please try again.`,
     );
   }
 
   return data as T;
 }
+
 export type ChatMessage = {
   id: string;
   noteId: string;

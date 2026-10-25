@@ -21,7 +21,7 @@ export default function ChatComposer({
   onSend,
   sending,
   initialMessage,
-  placeholder = "Ask Reverie anything about your note...",
+  placeholder = "Ask Marx anything about your note...",
 }: Props) {
   const [message, setMessage] = useState("");
   const [selectorOpen, setSelectorOpen] = useState(false);

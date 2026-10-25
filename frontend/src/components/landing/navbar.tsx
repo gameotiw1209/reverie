@@ -53,13 +53,9 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
       <div className="flex min-w-0 items-center gap-4">
         <a
-          href="#home"
-          className="shrink-0 text-3xl italic tracking-wide text-[#FFF6E8] transition-opacity hover:opacity-90"
-          style={{ fontFamily: "var(--font-newsreader), Georgia, serif" }}
-        >
-          Reverie
-        </a>
-
+        className="shrink-0 font-instrument text-3xl italic tracking-wide text-white transition-opacity hover:opacity-90">
+           Reverie
+           </a>
         <div
           className="hidden items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-2 text-[11px] text-[#FFF6E8]/80 backdrop-blur-md sm:inline-flex"
           style={{ fontFamily: "var(--font-jakarta), sans-serif" }}
