@@ -7,6 +7,8 @@ import CloudSky from "@/src/components/notes/cloudBackground";
 import NotesSidebar, { type Note, type NoteUser } from "@/src/components/notes/notesSidebar";
 import NotebookEditor from "@/src/components/notes/noteBookeditor";
 import NotesToolbar from "@/src/components/notes/notesToolbar";
+import NoteShareCard from "@/src/components/notes/noteShare";
+import { shareNoteImage } from "@/lib/shareNote";
 
 type UserResponse = { user: NoteUser };
 
@@ -26,8 +28,9 @@ export default function NotesPage() {
   const [error, setError] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(false);
 
+  const shareCardRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
+  
   const selectedNote = notes.find((note) => note.id === selectedId) ?? null;
 
   const filteredNotes = useMemo(() => {
@@ -216,27 +219,22 @@ export default function NotesPage() {
   }
 }, [router]);
 
-  const shareNote = useCallback(async () => {
-    if (!selectedNote) return;
+const shareNote = useCallback(async () => {
+  if (!selectedNote || !shareCardRef.current) return;
 
-    const content = `${title}\n\n${text}`;
+  try {
+    await shareNoteImage({
+      element: shareCardRef.current,
+      title,
+    });
 
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: title || "Reverie note",
-          text: content,
-        });
-      } else {
-        await navigator.clipboard.writeText(content);
-        setError("Note copied to clipboard.");
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name !== "AbortError") {
-        setError("Unable to share this note.");
-      }
+    setError("");
+  } catch (err) {
+    if (err instanceof Error && err.name !== "AbortError") {
+      setError(err.message || "Unable to share this note.");
     }
-  }, [selectedNote, title, text]);
+  }
+}, [selectedNote, title]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -342,7 +340,18 @@ return (
         }}
         error={error}
       />
-
+      {selectedNote && (
+        <div
+        aria-hidden="true"
+        style={{ position: "fixed", left: "-15000px", top: 0, width: 1200, pointerEvents: "none",}}>
+    <NoteShareCard
+      ref={shareCardRef}
+      note={selectedNote}
+      title={title}
+      text={text}
+    />
+  </div>
+)}
       <footer className="mt-4 w-full shrink-0 pb-4 text-center text-xs text-white/80 drop-shadow">
         Press{" "}
         <kbd className="rounded border border-white/20 bg-black/30 px-1.5 py-0.5 text-[10px]">

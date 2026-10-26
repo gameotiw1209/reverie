@@ -291,7 +291,7 @@ function __OriginkitBase_CloudSky(props: Props) {
     useEffect(() => {
         const canvas = canvasRef.current
         if (!canvas) return
-        const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false })
+        const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false, preserveDrawingBuffer: true })
         if (!gl) {
             console.error("CloudSky: WebGL unavailable")
             return
@@ -424,6 +424,7 @@ function __OriginkitBase_CloudSky(props: Props) {
         >
             <canvas
                 ref={canvasRef}
+                className="reverie-cloud-sky-canvas"
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
             />
         </div>
