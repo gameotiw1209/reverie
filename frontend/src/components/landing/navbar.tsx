@@ -13,7 +13,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio) audio.volume = 0.5;
+    if (audio) audio.volume = 0.25;
 
     return () => {
       audio?.pause();
@@ -25,7 +25,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     if (!audio) return;
 
     if (audio.paused) {
-      audio.volume = 0.3;
+      audio.volume = 0.25;
 
       try {
         await audio.play();

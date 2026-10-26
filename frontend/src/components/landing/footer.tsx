@@ -14,7 +14,7 @@ export default function SiteFooter() {
       </div>
 
       <span className="transition-colors hover:text-[#FFB781]">
-        Built with ❤️ aum
+        built with ❤️ aum
       </span>
     </footer>
   );

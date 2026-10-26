@@ -73,7 +73,7 @@ export default function NotesPage() {
   }, [loadData]);
 
   useEffect(() => {
-    const audio = new Audio("/20180512.mp4");
+    const audio = new Audio("/20200229 2.mp4");
     audio.loop = true;
     audio.volume = 0.25;
     audioRef.current = audio;
@@ -101,7 +101,7 @@ export default function NotesPage() {
       setError("");
     } catch (err) {
       console.error("Ambient audio playback error:", err);
-      setError("Unable to play ambient audio. Check public/20180512.mp4.");
+      setError("Unable to play ambient audio. Check public/20200229 2.mp4.");
       setSoundEnabled(false);
     }
   }, [soundEnabled]);
