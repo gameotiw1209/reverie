@@ -58,6 +58,11 @@ export default function NotesSidebar({
 }: Props) {
   const [menuId, setMenuId] = useState<string | null>(null);
 
+  const sortedNotes = [...notes].sort(
+  (a, b) =>
+    new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+);
+
   if (!sidebarOpen) {
     return (
       <div className="fixed left-5 top-5 z-40">
@@ -147,7 +152,7 @@ export default function NotesSidebar({
           </div>
 
           <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
-            {notes.map((note) => (
+            {sortedNotes.map((note) => (
               <div key={note.id} className="group relative">
                 <button
                   onClick={() => onSelectNote(note)}
@@ -192,7 +197,7 @@ export default function NotesSidebar({
               </div>
             ))}
 
-            {notes.length === 0 && (
+            {sortedNotes.length === 0 && (
               <p className="px-3 py-4 text-xs leading-6 text-white/40">
                 Your pages will appear here. Start with a new note.
               </p>
