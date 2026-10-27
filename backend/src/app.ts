@@ -14,6 +14,7 @@ app.use(cors({
   origin: [
     "http://localhost:5000",
     "http://localhost:3000",
+    "https://reverienote.vercel.app",
   ],
   credentials: true
 }));

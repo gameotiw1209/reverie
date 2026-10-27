@@ -2,5 +2,5 @@ node_modules
 dist/
 backend/src/generated/
 backend/dist/generated/
-frontend/public/20180512.mp4 
-frontend/public/20200229 2.mp4
+# frontend/public/20180512.mp4 
+# frontend/public/20200229 2.mp4
