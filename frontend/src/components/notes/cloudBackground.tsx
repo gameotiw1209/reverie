@@ -287,11 +287,24 @@ function __OriginkitBase_CloudSky(props: Props) {
     }
 
     const ptrRef = useRef({ x: 0, y: 0, inside: false })
+    const [isMobile, setIsMobile] = React.useState<boolean | null>(null)
 
     useEffect(() => {
+        const mediaQuery = window.matchMedia("(max-width: 767px)")
+        const updateMobile = () => setIsMobile(mediaQuery.matches)
+
+        updateMobile()
+        mediaQuery.addEventListener("change", updateMobile)
+
+        return () => mediaQuery.removeEventListener("change", updateMobile)
+    }, [])
+
+    useEffect(() => {
+        if (isMobile === null) return
+
         const canvas = canvasRef.current
         if (!canvas) return
-        const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false, preserveDrawingBuffer: true })
+        const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false })
         if (!gl) {
             console.error("CloudSky: WebGL unavailable")
             return
@@ -398,15 +411,20 @@ function __OriginkitBase_CloudSky(props: Props) {
         const onLeave = () => {
         ptrRef.current.inside = false;
     };
-    window.addEventListener("pointermove", track);
-    window.addEventListener("blur", onLeave);
-    raf = requestAnimationFrame(render);
+    if (!isMobile) {
+        window.addEventListener("pointermove", track)
+    }
+    window.addEventListener("blur", onLeave)
+    raf = requestAnimationFrame(render)
+
     return () => {
-        cancelAnimationFrame(raf);
-        window.removeEventListener("pointermove", track);
-        window.removeEventListener("blur", onLeave);
-    };
-    }, []);
+        cancelAnimationFrame(raf)
+        if (!isMobile) {
+            window.removeEventListener("pointermove", track)
+        }
+        window.removeEventListener("blur", onLeave)
+    }
+    }, [isMobile]);
 
     return (
         <div
@@ -424,7 +442,6 @@ function __OriginkitBase_CloudSky(props: Props) {
         >
             <canvas
                 ref={canvasRef}
-                className="reverie-cloud-sky-canvas"
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
             />
         </div>
