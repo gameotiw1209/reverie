@@ -31,23 +31,27 @@ export default function ChatConversation({
 }: Props) {
   return (
     <section className="mx-auto flex h-full min-h-0 w-full max-w-4xl flex-1 flex-col overflow-hidden">
-      <ChatHeader
-        note={selectedNote}
-        onClear={onClear}
-        clearing={clearing}
-      />
+      <div className="shrink-0">
+        <ChatHeader
+          note={selectedNote}
+          onClear={onClear}
+          clearing={clearing}
+        />
+      </div>
 
       {loadingHistory ? (
-        <div className="flex flex-1 items-center justify-center text-sm text-white/60">
-          Why Reverie ?...
+        <div className="flex min-h-0 flex-1 items-center justify-center text-sm text-white/60">
+          Loading your conversation...
         </div>
       ) : messages.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center px-6 text-center">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-6 text-center">
           <div>
             <div className="text-3xl text-amber-300">✦</div>
+
             <p className="mt-3 font-newsreader text-2xl italic text-white">
               A quiet space to reflect
             </p>
+
             <p className="mt-2 text-xs leading-5 text-white/55">
               Ask a question about your selected note to begin.
             </p>
@@ -57,13 +61,15 @@ export default function ChatConversation({
         <ChatMessages messages={messages} sending={sending} />
       )}
 
-      <ChatComposer
-        notes={notes}
-        selectedNote={selectedNote}
-        onSelectNote={onSelectNote}
-        onSend={onSend}
-        sending={sending || loadingHistory}
-      />
+      <div className="shrink-0 pb-[env(safe-area-inset-bottom)]">
+        <ChatComposer
+          notes={notes}
+          selectedNote={selectedNote}
+          onSelectNote={onSelectNote}
+          onSend={onSend}
+          sending={sending || loadingHistory}
+        />
+      </div>
     </section>
   );
 }

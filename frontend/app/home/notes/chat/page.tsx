@@ -3,18 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Volume2, VolumeX } from "lucide-react";
-import {
-  apiRequest,
-  clearChatHistory,
-  getChatHistory,
-  sendChatMessage,
-} from "@/lib/api";
+import {apiRequest,clearChatHistory,getChatHistory,sendChatMessage,} from "@/lib/api";
 import type { ChatMessage } from "@/lib/api";
 import CloudSky from "@/src/components/notes/cloudBackground";
-import NotesSidebar, {
-  type Note,
-  type NoteUser,
-} from "@/src/components/notes/notesSidebar";
+import NotesSidebar, {type Note,type NoteUser,} from "@/src/components/notes/notesSidebar";
 import ChatLanding from "@/src/components/chat/chatLanding";
 import ChatConversation from "@/src/components/chat/chatConversation";
 
@@ -40,13 +32,48 @@ export default function ChatPage() {
 
   const filteredNotes = notes.filter((note) => {
     const query = search.trim().toLowerCase();
-
     return (
       !query ||
       note.title.toLowerCase().includes(query) ||
       note.text.toLowerCase().includes(query)
     );
   });
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+
+    if (!viewport) return;
+
+    const updateViewport = () => {
+      document.documentElement.style.setProperty(
+        "--chat-viewport-height",
+        `${viewport.height}px`,
+      );
+
+      document.documentElement.style.setProperty(
+        "--chat-viewport-top",
+        `${viewport.offsetTop}px`,
+      );
+    };
+
+    updateViewport();
+
+    viewport.addEventListener("resize", updateViewport);
+    viewport.addEventListener("scroll", updateViewport);
+
+    return () => {
+      viewport.removeEventListener("resize", updateViewport);
+      viewport.removeEventListener("scroll", updateViewport);
+
+      document.documentElement.style.removeProperty(
+        "--chat-viewport-height",
+      );
+
+      document.documentElement.style.removeProperty(
+        "--chat-viewport-top",
+      );
+    };
+  }, []);
 
   const loadHistory = useCallback(async (noteId: string) => {
     setLoadingHistory(true);
@@ -81,6 +108,7 @@ export default function ChatPage() {
       router.replace(
         `/home/notes/chat?noteId=${encodeURIComponent(note.id)}`,
       );
+
       await loadHistory(note.id);
     },
     [loadHistory, router],
@@ -117,7 +145,10 @@ export default function ChatPage() {
 
             try {
               const result = await getChatHistory(note.id);
-              if (!cancelled) setMessages(result.chat);
+
+              if (!cancelled) {
+                setMessages(result.chat);
+              }
             } catch (err) {
               if (!cancelled) {
                 setError(
@@ -127,7 +158,9 @@ export default function ChatPage() {
                 );
               }
             } finally {
-              if (!cancelled) setLoadingHistory(false);
+              if (!cancelled) {
+                setLoadingHistory(false);
+              }
             }
           } else {
             router.replace("/home/notes/chat");
@@ -139,12 +172,13 @@ export default function ChatPage() {
           router.replace("/");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     void initialise();
-
     return () => {
       cancelled = true;
     };
@@ -152,6 +186,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     const audio = new Audio("/20200229 2.mp4");
+
     audio.loop = true;
     audio.volume = 0.25;
     audioRef.current = audio;
@@ -164,6 +199,7 @@ export default function ChatPage() {
 
   const toggleSound = useCallback(async () => {
     const audio = audioRef.current;
+
     if (!audio) return;
 
     if (soundEnabled) {
@@ -236,7 +272,9 @@ export default function ChatPage() {
       setMessages([]);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unable to clear conversation.",
+        err instanceof Error
+          ? err.message
+          : "Unable to clear conversation.",
       );
     } finally {
       setClearing(false);
@@ -263,9 +301,13 @@ export default function ChatPage() {
   }
 
   if (!user) return null;
-
   return (
-    <main className="relative min-h-dvh w-full overflow-x-clip bg-sky-200 text-white">
+    <main
+      className="fixed inset-x-0 top-[var(--chat-viewport-top,0px)] z-0 flex w-full flex-col overflow-hidden bg-sky-200 text-white md:relative md:inset-auto md:h-dvh md:overflow-x-clip"
+      style={{
+        height: "var(--chat-viewport-height, 100dvh)",
+      }}
+    >
       <div className="pointer-events-none fixed inset-0 z-0 select-none">
         <CloudSky />
         <div className="absolute inset-0 bg-blue-900/5 mix-blend-multiply" />
@@ -283,12 +325,18 @@ export default function ChatPage() {
         onSelectNote={(note) => void selectChatNote(note)}
         onDeleteNote={(note) => {
           void (async () => {
-            if (!window.confirm(`Delete "${note.title || "Untitled note"}"?`)) {
+            if (
+              !window.confirm(
+                `Delete "${note.title || "Untitled note"}"?`,
+              )
+            ) {
               return;
             }
 
             try {
-              await apiRequest(`/notes/${note.id}`, { method: "DELETE" });
+              await apiRequest(`/notes/${note.id}`, {
+                method: "DELETE",
+              });
 
               setNotes((current) =>
                 current.filter((item) => item.id !== note.id),
@@ -301,7 +349,9 @@ export default function ChatPage() {
               }
             } catch (err) {
               setError(
-                err instanceof Error ? err.message : "Unable to delete note.",
+                err instanceof Error
+                  ? err.message
+                  : "Unable to delete note.",
               );
             }
           })();
@@ -311,7 +361,7 @@ export default function ChatPage() {
       />
 
       <section
-        className={`relative z-10 flex h-dvh min-h-0 flex-col overflow-hidden px-3 pb-3 pt-20 transition-[margin-left] duration-200 sm:px-6 sm:pt-6 ${
+        className={`relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden px-3 pb-3 pt-20 transition-[margin-left] duration-200 sm:px-6 sm:pt-6 ${
           sidebarOpen ? "md:ml-[320px]" : "md:ml-24"
         }`}
       >
@@ -323,14 +373,18 @@ export default function ChatPage() {
             aria-label={soundEnabled ? "Turn sound off" : "Turn sound on"}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/30 text-white shadow-lg backdrop-blur-xl transition hover:bg-black/45"
           >
-            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            {soundEnabled ? (
+              <Volume2 size={16} />
+            ) : (
+              <VolumeX size={16} />
+            )}
           </button>
         </div>
 
         {error && (
           <div
             role="alert"
-            className="mx-auto mb-3 w-full max-w-3xl rounded-xl border border-rose-200/20 bg-rose-950/60 px-4 py-3 text-sm text-rose-100 backdrop-blur-xl"
+            className="mx-auto mb-3 w-full max-w-3xl shrink-0 rounded-xl border border-rose-200/20 bg-rose-950/60 px-4 py-3 text-sm text-rose-100 backdrop-blur-xl"
           >
             {error}
           </div>
@@ -349,7 +403,7 @@ export default function ChatPage() {
             onClear={() => void clearConversation()}
           />
         ) : selectedNote && loadingHistory ? (
-          <div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center text-sm text-white/70">
+          <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 items-center justify-center text-sm text-white/70">
             Loading your conversation...
           </div>
         ) : (
