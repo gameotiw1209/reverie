@@ -156,3 +156,16 @@ body,
   height: 0;
   background: transparent;
 }
+.reverie-mobile-cloud-background {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .reverie-mobile-cloud-background {
+        display: block;
+    }
+
+    .reverie-cloud-sky-canvas {
+        display: none !important;
+    }
+}

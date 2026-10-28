@@ -300,15 +300,17 @@ function __OriginkitBase_CloudSky(props: Props) {
     }, [])
 
     useEffect(() => {
-        if (isMobile === null) return
+    if (isMobile === null || isMobile) return;
 
-        const canvas = canvasRef.current
-        if (!canvas) return
-        const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false })
-        if (!gl) {
-            console.error("CloudSky: WebGL unavailable")
-            return
-        }
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false,preserveDrawingBuffer: false,premultipliedAlpha: false, stencil: false });
+
+    if (!gl) {
+        console.error("CloudSky: WebGL unavailable");
+        return;
+    }
 
         const vs = compile(gl, gl.VERTEX_SHADER, VERT_SRC)
         const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG_SRC)
@@ -427,25 +429,45 @@ function __OriginkitBase_CloudSky(props: Props) {
     }, [isMobile]);
 
     return (
+    <div
+        style={{
+            position: "relative",
+            overflow: "hidden",
+            background,
+            isolation: "isolate",
+            minWidth: 0,
+            minHeight: 0,
+            width: typeof width === "number" && width > 0 ? width : "100%",
+            height: typeof height === "number" && height > 0 ? height : "100%",
+            ...style,
+        }}
+    >
         <div
+            className="reverie-mobile-cloud-background"
             style={{
-                position: "relative",
-                overflow: "hidden",
-                background,
-                isolation: "isolate",
-                minWidth: 1200,
-                minHeight: 800,
-                width: typeof width === "number" && width > 0 ? width : "100%",
-                height: typeof height === "number" && height > 0 ? height : "100%",
-                ...style,
+                position: "absolute",
+                inset: 0,
+                background: `
+                    radial-gradient(ellipse at 75% 20%, rgba(255,255,255,0.9) 0%, transparent 40%),
+                    radial-gradient(ellipse at 20% 65%, rgba(255,255,255,0.65) 0%, transparent 45%),
+                    linear-gradient(180deg, #005BFF 0%, #83B8F0 55%, #E7F3FF 100%)
+                `,
             }}
-        >
-            <canvas
-                ref={canvasRef}
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
-            />
-        </div>
-    )
+        />
+        <canvas
+            ref={canvasRef}
+            className="reverie-cloud-sky-canvas"
+            style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                display: "block",
+            }}
+        />
+    </div>
+);
+
 }
 
 const __originkitPresetProps = {
