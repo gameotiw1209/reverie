@@ -300,7 +300,7 @@ function __OriginkitBase_CloudSky(props: Props) {
     }, [])
 
     useEffect(() => {
-    if (isMobile === null || isMobile) return;
+   if (isMobile === null) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -363,7 +363,7 @@ function __OriginkitBase_CloudSky(props: Props) {
             farX = (farX - FAR_DRIFT * rate * dt) % 1000
             cirrusX = (cirrusX - CIRRUS_DRIFT * rate * dt) % 1000
 
-            const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+            const dpr = Math.min( window.devicePixelRatio || 1,isMobile ? 0.8 : MAX_DPR);
             const cw = sizeRef.current.w || canvas.clientWidth || 1200
             const ch = sizeRef.current.h || canvas.clientHeight || 800
             const bw = Math.max(1, Math.round(cw * dpr))
@@ -383,7 +383,7 @@ function __OriginkitBase_CloudSky(props: Props) {
             gl.uniform1f(u("uNearX"), nearX)
             gl.uniform1f(u("uFarX"), farX)
             gl.uniform1f(u("uCirrusX"), cirrusX)
-            gl.uniform1f(u("uCoverage"), v.coverage as number)
+            gl.uniform1f(u("uCoverage"),isMobile? (v.coverage as number) * 0.8: (v.coverage as number))
             gl.uniform1f(u("uSize"), v.size as number)
             gl.uniform1f(u("uSoftness"), v.softness as number)
             gl.uniform1f(u("uShadow"), v.shadow as number)
@@ -442,18 +442,7 @@ function __OriginkitBase_CloudSky(props: Props) {
             ...style,
         }}
     >
-        <div
-            className="reverie-mobile-cloud-background"
-            style={{
-                position: "absolute",
-                inset: 0,
-                background: `
-                    radial-gradient(ellipse at 75% 20%, rgba(255,255,255,0.9) 0%, transparent 40%),
-                    radial-gradient(ellipse at 20% 65%, rgba(255,255,255,0.65) 0%, transparent 45%),
-                    linear-gradient(180deg, #005BFF 0%, #83B8F0 55%, #E7F3FF 100%)
-                `,
-            }}
-        />
+
         <canvas
             ref={canvasRef}
             className="reverie-cloud-sky-canvas"

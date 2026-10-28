@@ -156,16 +156,63 @@ body,
   height: 0;
   background: transparent;
 }
-.reverie-mobile-cloud-background {
-    display: none;
+/* .reverie-mobile-cloud-background {
+    display: none !important;
 }
 
 @media (max-width: 767px) {
     .reverie-mobile-cloud-background {
         display: block;
+        overflow: hidden;
+        background: linear-gradient(
+            180deg,
+            #005bff 0%,
+            #83b8f0 55%,
+            #e7f3ff 100%
+        );
+    }
+
+    .reverie-mobile-cloud-background::before,
+    .reverie-mobile-cloud-background::after {
+        content: "";
+        position: absolute;
+        inset: -35%;
+        pointer-events: none;
+        will-change: transform;
+    }
+
+    .reverie-mobile-cloud-background::before {
+        background:
+            radial-gradient(ellipse at 25% 35%, rgba(255,255,255,0.75) 0%, transparent 32%),
+            radial-gradient(ellipse at 70% 45%, rgba(255,255,255,0.6) 0%, transparent 35%),
+            radial-gradient(ellipse at 45% 75%, rgba(255,255,255,0.5) 0%, transparent 30%);
+        animation: mobileCloudDrift 35s ease-in-out infinite alternate;
+    }
+
+    .reverie-mobile-cloud-background::after {
+        background:
+            radial-gradient(ellipse at 35% 30%, rgba(255,255,255,0.4) 0%, transparent 25%),
+            radial-gradient(ellipse at 80% 65%, rgba(255,255,255,0.45) 0%, transparent 30%);
+        animation: mobileCloudDrift 50s ease-in-out infinite alternate-reverse;
     }
 
     .reverie-cloud-sky-canvas {
         display: none !important;
     }
-}
+
+    @keyframes mobileCloudDrift {
+        from {
+            transform: translate3d(-3%, -1%, 0);
+        }
+        to {
+            transform: translate3d(3%, 2%, 0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .reverie-mobile-cloud-background::before,
+        .reverie-mobile-cloud-background::after {
+            animation: none;
+        }
+    }
+} */
