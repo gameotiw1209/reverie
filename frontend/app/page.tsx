@@ -50,6 +50,13 @@ export default function Home() {
     };
   }, [authView]);
 
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/health`, {
+      method: "GET",
+      cache: "no-store",
+    }).catch(() => {});
+  }, []);
+
   return (
     <div className="relative isolate min-h-dvh overflow-x-clip bg-[#131313] text-[#E5E2E1]">
       <div
