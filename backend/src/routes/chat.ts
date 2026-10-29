@@ -76,7 +76,13 @@ chatRouter.post("/notes/:id/chat",authenticateToken, chatRateLimiter, async(req:
  
         },...history.map((msg) => ({
             role: msg.role as "user" | "assistant",
-            content: decrypt(msg.content),
+            content: (() => {
+                try {
+                    return decrypt(msg.content);
+                } catch {
+                    return msg.content;
+                }
+            })(),
         })),
         {
         role: "user",
@@ -157,15 +163,17 @@ chatRouter.get("/notes/:id/chat",authenticateToken,async(req:Request,res:Respons
         },
       });
         const chat=await prisma.chatMessage.findMany({
-            where:{
-                userId:userid,
-                noteId
-            },
-            orderBy:{
-                createdAt:"asc"
-            }
-        });
-        res.status(200).json({chat});
+    where:{ userId:userid, noteId },
+    orderBy:{ createdAt:"asc" }
+});
+const decryptedChat = chat.map((msg) => {
+    try {
+        return { ...msg, content: decrypt(msg.content) };
+    } catch {
+        return { ...msg, content: msg.content };
+    }
+});
+res.status(200).json({ chat: decryptedChat });
     }catch(error){
         console.error("Chat history error:",error);
         res.status(500).json({msg:"Failed to retrieve chat history"});
