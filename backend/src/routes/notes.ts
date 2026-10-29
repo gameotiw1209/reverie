@@ -76,8 +76,7 @@ notesRouter.patch("/notes/:id", authenticateToken, async (req: Request, res: Res
         ...(text !== undefined && { text: encrypt(text.trim() )})
       }
     });
-
-    res.status(200).json(note);
+    res.status(200).json({ ...note, title: title ?? decrypt(note.title), text: text ?? decrypt(note.text) });
   } catch (error) {
   if ( error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025"
   ) {
