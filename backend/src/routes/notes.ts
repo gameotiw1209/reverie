@@ -24,12 +24,9 @@ notesRouter.post("/notes",authenticateToken, async (req: Request, res: Response)
       res.status(400).json({ msg: "title, text are required" });
       return;
     }
-
     const note = await prisma.notes.create({
-      data: { title: encrypt(title.trim()), text: encrypt(text.trim()), userID: userId },
-    });
-
-    res.status(201).json(note);
+      data: { title: encrypt(title.trim()), text: encrypt(text.trim()), userID: userId },});
+      res.status(201).json({ ...note, title: title.trim(), text: text.trim() });
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Something went wrong" });
