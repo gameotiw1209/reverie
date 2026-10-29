@@ -3,6 +3,7 @@ import authenticateToken from "../middleware/auth";
 import {prisma} from "../lib/prisma";
 import groq,{GROQ_MODEL} from "../lib/groq";
 import { chatRateLimiter } from "../middleware/chatRateLimit";
+import { decrypt } from "../lib/encryption";
 
 const chatRouter=express.Router();
 
@@ -45,14 +46,16 @@ chatRouter.post("/notes/:id/chat",authenticateToken, chatRateLimiter, async(req:
             },
             take:20
         });
+        const noteText = decrypt(note.text);
+        const noteTitle = decrypt(note.title);
         const history=previousMessages.reverse();
         const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
             {role: "system",
             content: `You are Marx, a chill, thoughtful AI companion inside Reverie. You're genuinely knowledgeable and can talk about anything, not just the user's journal, think of yourself as a smart, curious friend who happens to be inside a journaling app, not a note-summarizing tool.
             If the user asks what Reverie is, describe it simply: "A quiet space to write your thoughts, and an AI right there to think through them with you." Keep it short and casual, don't over-explain.
             <note>
-            Title: ${note.title}
-            ${note.text}
+            Title: ${noteTitle}
+            ${noteText}
             </note>
             HOW TO USE THE NOTE:
             The note above is available context, not a topic you have to return to.
@@ -73,7 +76,7 @@ chatRouter.post("/notes/:id/chat",authenticateToken, chatRateLimiter, async(req:
  
         },...history.map((msg) => ({
             role: msg.role as "user" | "assistant",
-            content: msg.content
+            content: decrypt(msg.content),
         })),
         {
         role: "user",

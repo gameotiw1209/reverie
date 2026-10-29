@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import authenticateToken from "../middleware/auth";
 import { Prisma } from "@prisma/client";
+import { decrypt, encrypt } from "../lib/encryption";
 
 const notesRouter = express.Router();
 // Brought in authenticateToken so the user doesn't need to provide
@@ -25,7 +26,7 @@ notesRouter.post("/notes",authenticateToken, async (req: Request, res: Response)
     }
 
     const note = await prisma.notes.create({
-      data: { title: title.trim(), text: text.trim(), userID: userId },
+      data: { title: encrypt(title.trim()), text: encrypt(text.trim()), userID: userId },
     });
 
     res.status(201).json(note);
@@ -46,7 +47,8 @@ notesRouter.get("/notes", authenticateToken, async (req: Request, res: Response)
       return;
     }
     const notes = await prisma.notes.findMany({where: {userID: userId}, orderBy: {createdAt: "desc"}});
-    res.status(200).json(notes);
+    const decrypted = notes.map((note) => ({...note, title: decrypt(note.title),text: decrypt(note.text),}));
+    res.status(200).json(decrypted);
     return;
   } catch (error) {
     console.error(error);
@@ -73,8 +75,8 @@ notesRouter.patch("/notes/:id", authenticateToken, async (req: Request, res: Res
     const note = await prisma.notes.update({
       where: { id: noteId, userID: userId },
       data: {
-        ...(title !== undefined && { title: title.trim() }),
-        ...(text !== undefined && { text: text.trim() })
+        ...(title !== undefined && { title: encrypt(title.trim()) }),
+        ...(text !== undefined && { text: encrypt(text.trim() )})
       }
     });
 
