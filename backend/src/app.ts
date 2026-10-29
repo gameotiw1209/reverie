@@ -24,5 +24,8 @@ app.set("trust proxy", 1);
 app.use("/api", notesRouter);
 app.use("/api", authRouter);
 app.use("/api", chatRouter);
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "server chalu" });
+});
 
 export default app;
