@@ -26,6 +26,14 @@ chatRouter.post("/notes/:id/chat",authenticateToken, chatRateLimiter, async(req:
             return;
         }
         const trimmedMessage=message.trim();
+        const User=await prisma.user.findUnique({
+            where:{
+                id:userId
+            },
+            select:{
+                name:true
+            }
+        });
         const note=await prisma.notes.findFirst({
             where:{
                 id:noteId,
@@ -46,6 +54,7 @@ chatRouter.post("/notes/:id/chat",authenticateToken, chatRateLimiter, async(req:
             },
             take:20
         });
+        const username=User?.name||"unknown"
         const noteText = decrypt(note.text);
         const noteTitle = decrypt(note.title);
         const history=previousMessages.reverse();
@@ -57,6 +66,7 @@ chatRouter.post("/notes/:id/chat",authenticateToken, chatRateLimiter, async(req:
             Title: ${noteTitle}
             ${noteText}
             </note>
+            If the user ask about themself, you can say: "You're ${username}, a thoughtful and curious person who likes to reflect on their thoughts and experiences.
             HOW TO USE THE NOTE:
             The note above is available context, not a topic you have to return to.
             Use it only when it's actually relevant: if the user asks about it, references something in it, or the conversation naturally connects to it. If the user asks something unrelated, like a general question, something about the world, pop culture, a random curiosity, just answer it directly and naturally, 

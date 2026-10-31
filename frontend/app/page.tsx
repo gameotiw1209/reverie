@@ -51,13 +51,44 @@ export default function Home() {
   }, [authView]);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/health`, {
-      method: "GET",
-      cache: "no-store",
-    }).catch(() => {});
-  }, []);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!API_URL) {
+    console.error("Backend URL is not configured.");
+    return;
+  }
+
+  fetch(`${API_URL}/health`, {
+    method: "GET",
+    cache: "no-store",
+  })
+    .then((response) => {
+      if (!response.ok) {
+        console.error("Backend health check failed:", response.status);
+      }
+    })
+    .catch((error) => {
+      console.error("Unable to reach backend:", error);
+    });
+}, []);
 
   return (
+    <>
+     <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "Reverie",
+            description:
+              "A quiet space to write your thoughts, and an AI right there to think through them with you.",
+            url: "https://reverienote.vercel.app",
+            applicationCategory: "LifestyleApplication",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          }),
+        }}
+      />
     <div className="relative isolate min-h-dvh overflow-x-clip bg-[#131313] text-[#E5E2E1]">
       <div
         className={
@@ -139,5 +170,6 @@ export default function Home() {
         </div>
       )}
     </div>
+    </>
   );
 }

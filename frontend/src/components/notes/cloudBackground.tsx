@@ -249,7 +249,7 @@ function __OriginkitBase_CloudSky(props: Props) {
         background = "#0075FF",
         baseColor = "#B4D2F0",
         accentColor = "#FFFFFF",
-        density = 100,
+        density = 67,
         speed = 64,
         size = 130,
         clouds,

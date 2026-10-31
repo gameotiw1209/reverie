@@ -1,14 +1,16 @@
 "use client";
 
-import { Check, Share2, Volume2, VolumeX } from "lucide-react";
+import { Check, Share2, Volume2, VolumeX, Moon, Sun } from "lucide-react";
 
 type Props = {
   dirty: boolean;
   saving: boolean;
   hasNote: boolean;
   soundEnabled: boolean;
+  darkMode: boolean;
   onSave: () => void;
   onToggleSound: () => void;
+  onToggleDarkMode: () => void;
   onShare: () => void;
 };
 
@@ -17,8 +19,10 @@ export default function NotesToolbar({
   saving,
   hasNote,
   soundEnabled,
+  darkMode,
   onSave,
   onToggleSound,
+  onToggleDarkMode,
   onShare,
 }: Props) {
   return (
@@ -26,7 +30,11 @@ export default function NotesToolbar({
       <div className="flex items-center gap-2 rounded-full border border-white/30 bg-white/20 px-3 py-1.5 text-xs text-white shadow-sm backdrop-blur-md">
         <span
           className={`h-2 w-2 rounded-full ${
-            saving ? "animate-pulse bg-amber-300" : "bg-emerald-400"
+            saving
+              ? "animate-pulse bg-amber-300"
+              : dirty
+                ? "bg-amber-300"
+                : "bg-emerald-400"
           }`}
         />
         <span className="font-newsreader text-sm italic">
@@ -47,7 +55,9 @@ export default function NotesToolbar({
           type="button"
           onClick={onShare}
           disabled={!hasNote}
-          className="flex items-center gap-1.5 rounded-full border border-white/30 bg-black/25 px-4 py-2 text-xs font-medium text-white shadow-sm backdrop-blur-md transition hover:bg-black/35 disabled:opacity-40"
+          title="Share note"
+          aria-label="Share note"
+          className="flex items-center gap-1.5 rounded-full border border-white/30 bg-black/25 px-4 py-2 text-xs font-medium text-white shadow-sm backdrop-blur-md transition hover:bg-black/35 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Share2 size={14} className="text-white/80" />
           Share
@@ -57,10 +67,27 @@ export default function NotesToolbar({
           type="button"
           onClick={onSave}
           disabled={saving || !dirty}
+          title="Save note"
+          aria-label="Save note"
           className="flex items-center gap-1.5 rounded-full border border-amber-200/80 bg-[#FFF5E1] px-4 py-2 text-xs font-semibold text-slate-900 shadow-[0_4px_14px_rgba(255,245,225,0.25)] transition hover:bg-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Check size={14} />
           {saving ? "Saving..." : "Save Note"}
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggleDarkMode}
+          aria-label={darkMode ? "Switch to light clouds" : "Switch to dark clouds"}
+          aria-pressed={darkMode}
+          title={darkMode ? "Switch to light clouds" : "Switch to dark clouds"}
+          className="flex items-center justify-center rounded-full border border-white/20 bg-black/30 p-2 text-white/90 shadow-sm backdrop-blur-md transition hover:bg-black/40"
+        >
+          {darkMode ? (
+            <Sun size={16} className="text-amber-300" />
+          ) : (
+            <Moon size={16} className="text-white/70" />
+          )}
         </button>
 
         <button

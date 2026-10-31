@@ -3,12 +3,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Volume2, VolumeX } from "lucide-react";
-import {apiRequest,clearChatHistory,getChatHistory,sendChatMessage,} from "@/lib/api";
+import {
+  apiRequest,
+  clearChatHistory,
+  getChatHistory,
+  sendChatMessage,
+} from "@/lib/api";
 import type { ChatMessage } from "@/lib/api";
 import CloudSky from "@/src/components/notes/cloudBackground";
-import NotesSidebar, {type Note,type NoteUser,} from "@/src/components/notes/notesSidebar";
+import NotesSidebar, {
+  type Note,
+  type NoteUser,
+} from "@/src/components/notes/notesSidebar";
 import ChatLanding from "@/src/components/chat/chatLanding";
 import ChatConversation from "@/src/components/chat/chatConversation";
+import { getSavedTheme } from "@/lib/theme";
 
 type UserResponse = { user: NoteUser };
 
@@ -27,17 +36,23 @@ export default function ChatPage() {
   const [clearing, setClearing] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [error, setError] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const filteredNotes = notes.filter((note) => {
     const query = search.trim().toLowerCase();
+
     return (
       !query ||
       note.title.toLowerCase().includes(query) ||
       note.text.toLowerCase().includes(query)
     );
   });
+
+  useEffect(() => {
+    setDarkMode(getSavedTheme());
+  }, []);
 
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -179,6 +194,7 @@ export default function ChatPage() {
     }
 
     void initialise();
+
     return () => {
       cancelled = true;
     };
@@ -294,13 +310,14 @@ export default function ChatPage() {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-[#15171C] text-white">
         <p className="font-newsreader text-2xl italic">
-          Opening your sanctuary...
+          Opening your chat...
         </p>
       </main>
     );
   }
 
   if (!user) return null;
+
   return (
     <main
       className="fixed inset-x-0 top-[var(--chat-viewport-top,0px)] z-0 flex w-full flex-col overflow-hidden bg-sky-200 text-white md:relative md:inset-auto md:h-dvh md:overflow-x-clip"
@@ -309,8 +326,35 @@ export default function ChatPage() {
       }}
     >
       <div className="pointer-events-none fixed inset-0 z-0 select-none">
-        <CloudSky />
-        <div className="absolute inset-0 bg-blue-900/5 mix-blend-multiply" />
+        <CloudSky
+          background={darkMode ? "#050A1A" : "#005BFF"}
+          baseColor={darkMode ? "#1C2B4D" : "#B4D2F0"}
+          accentColor={darkMode ? "#2E3850" : "#FFFFFF"}
+          speed={87}
+          clouds={{
+            cirrus: 100,
+            shadow: 70,
+            softness: 200,
+          }}
+          sun={{
+            x: 100,
+            y: 100,
+            glow: "#FFFFFF",
+          }}
+          pointer={{
+            wind: 300,
+            damping: 50,
+            parallax: 300,
+          }}
+        />
+
+        <div
+          className={
+            darkMode
+              ? "absolute inset-0 bg-black/10"
+              : "absolute inset-0 bg-blue-900/5 mix-blend-multiply"
+          }
+        />
       </div>
 
       <NotesSidebar
